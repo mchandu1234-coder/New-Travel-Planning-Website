@@ -22,14 +22,18 @@ export default function TripWizardPage() {
   // Form State
   const [title, setTitle] = useState('');
   const [destinationId, setDestinationId] = useState(preselectedDestId || '');
+  const [destSearch, setDestSearch] = useState('');
+  const [destContinent, setDestContinent] = useState('All');
   const [startDate, setStartDate] = useState('2026-10-15');
   const [endDate, setEndDate] = useState('2026-10-22');
   const [travelersCount, setTravelersCount] = useState(2);
   const [totalBudget, setTotalBudget] = useState(2500);
   const [currency, setCurrency] = useState('USD');
 
+  const CONTINENT_OPTIONS = ['All', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
+
   useEffect(() => {
-    destinationApi.getAll()
+    destinationApi.getAll({ size: 100 })
       .then((res) => {
         if (res.data.success) {
           const list = Array.isArray(res.data.data) ? res.data.data : (res.data.data?.content || []);
@@ -44,10 +48,24 @@ export default function TripWizardPage() {
 
   const selectedDestObj = destinations.find((d) => String(d.id) === String(destinationId));
 
+  const filteredDestinations = destinations.filter((dest) => {
+    const term = destSearch.trim().toLowerCase();
+    const matchesSearch = !term ||
+      dest.name?.toLowerCase().includes(term) ||
+      dest.country?.toLowerCase().includes(term) ||
+      (dest.city && dest.city.toLowerCase().includes(term));
+    const matchesContinent = destContinent === 'All' || dest.continent?.toLowerCase() === destContinent.toLowerCase();
+    return matchesSearch && matchesContinent;
+  });
+
   const handleNext = () => {
     setError('');
     if (step === 1 && !title.trim()) {
       setError('Please provide a name for your trip');
+      return;
+    }
+    if (step === 1 && !destinationId) {
+      setError('Please select a travel destination');
       return;
     }
     if (step === 2) {
@@ -159,30 +177,107 @@ export default function TripWizardPage() {
                 />
               </div>
 
-              <div>
-                <label className="block text-xs font-bold text-slate-300 mb-2">Select Destination</label>
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-64 overflow-y-auto pr-2">
-                  {destinations.map((dest) => {
-                    const img = dest.heroImageUrl || dest.imageUrl || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=300&q=80';
-                    return (
-                      <div
-                        key={dest.id}
-                        onClick={() => setDestinationId(dest.id)}
-                        className={`p-3 rounded-2xl border flex items-center space-x-3 cursor-pointer transition ${
-                          Number(destinationId) === Number(dest.id)
-                            ? 'bg-cyan-500/15 border-cyan-400 text-cyan-300'
-                            : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700'
-                        }`}
+              <div className="space-y-3">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
+                  <label className="block text-xs font-bold text-slate-300">
+                    Select Destination <span className="text-cyan-400 font-normal">({destinations.length} global locations)</span>
+                  </label>
+                  
+                  {/* Inline Destination Search */}
+                  <div className="relative w-full sm:w-64">
+                    <input
+                      type="text"
+                      placeholder="Search country or city..."
+                      value={destSearch}
+                      onChange={(e) => setDestSearch(e.target.value)}
+                      className="w-full bg-slate-900/90 border border-slate-700/80 rounded-xl px-3 py-1.5 text-xs text-slate-100 placeholder-slate-400 outline-none focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400"
+                    />
+                    {destSearch && (
+                      <button
+                        onClick={() => setDestSearch('')}
+                        className="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-400 hover:text-slate-200"
                       >
-                        <img src={img} alt={dest.name} className="w-12 h-12 rounded-xl object-cover" />
-                        <div>
-                          <div className="font-bold text-xs">{dest.name}</div>
-                          <div className="text-[10px] text-slate-400">{dest.country}</div>
-                        </div>
-                      </div>
-                    );
-                  })}
+                        ✕
+                      </button>
+                    )}
+                  </div>
                 </div>
+
+                {/* Continent Quick-Filter Pills */}
+                <div className="flex flex-wrap gap-1.5 pb-1">
+                  {CONTINENT_OPTIONS.map((c) => (
+                    <button
+                      key={c}
+                      type="button"
+                      onClick={() => setDestContinent(c)}
+                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+                        destContinent === c
+                          ? 'bg-cyan-500 text-slate-950 shadow-sm'
+                          : 'bg-slate-900/70 border border-slate-800 text-slate-400 hover:text-slate-200 hover:bg-slate-800'
+                      }`}
+                    >
+                      {c}
+                    </button>
+                  ))}
+                </div>
+
+                {/* Destinations Scrollable Grid */}
+                {filteredDestinations.length === 0 ? (
+                  <div className="p-8 text-center rounded-2xl bg-slate-950/60 border border-slate-800 text-slate-400 text-xs">
+                    No destinations match "<span className="text-cyan-400">{destSearch}</span>" in {destContinent}.
+                    <button
+                      type="button"
+                      onClick={() => { setDestSearch(''); setDestContinent('All'); }}
+                      className="block mx-auto mt-2 text-cyan-400 font-bold hover:underline"
+                    >
+                      Reset filter
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-72 overflow-y-auto pr-1.5 custom-scrollbar">
+                    {filteredDestinations.map((dest) => {
+                      const img = dest.heroImageUrl || dest.imageUrl || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=300&q=80';
+                      const isSelected = Number(destinationId) === Number(dest.id);
+                      return (
+                        <div
+                          key={dest.id}
+                          onClick={() => setDestinationId(dest.id)}
+                          className={`p-3 rounded-2xl border flex items-center justify-between space-x-3 cursor-pointer transition relative ${
+                            isSelected
+                              ? 'bg-gradient-to-r from-cyan-950/70 to-slate-900 border-cyan-400 text-cyan-200 ring-1 ring-cyan-400 shadow-md shadow-cyan-500/10'
+                              : 'bg-slate-950/60 border-slate-800 text-slate-300 hover:border-slate-700 hover:bg-slate-900/40'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-3 min-w-0">
+                            <img src={img} alt={dest.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
+                            <div className="min-w-0">
+                              <div className="font-bold text-xs truncate text-slate-100">{dest.name}</div>
+                              <div className="text-[10px] text-slate-400 truncate">{dest.country} • <span className="text-slate-500">{dest.continent}</span></div>
+                            </div>
+                          </div>
+                          {isSelected && (
+                            <div className="w-6 h-6 rounded-full bg-cyan-400 text-slate-950 flex items-center justify-center flex-shrink-0 shadow-sm">
+                              <Check className="w-3.5 h-3.5 stroke-[3]" />
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+
+                {/* Selected Destination Active Banner */}
+                {selectedDestObj && (
+                  <div className="mt-3 p-3 bg-cyan-500/10 border border-cyan-500/30 rounded-2xl flex items-center justify-between text-xs">
+                    <div className="flex items-center space-x-2.5">
+                      <Compass className="w-4 h-4 text-cyan-400 flex-shrink-0" />
+                      <span className="text-slate-300">
+                        Selected: <strong className="text-cyan-300">{selectedDestObj.name}</strong> ({selectedDestObj.country})
+                      </span>
+                    </div>
+                    <span className="text-emerald-400 font-bold">~${selectedDestObj.averageDailyCost || 150}/day</span>
+                  </div>
+                )}
               </div>
             </div>
           )}

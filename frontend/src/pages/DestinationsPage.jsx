@@ -27,7 +27,7 @@ export default function DestinationsPage() {
 
   const fetchDestinations = () => {
     setLoading(true);
-    const params = {};
+    const params = { size: 100 };
     if (selectedContinent !== 'All') params.continent = selectedContinent;
 
     destinationApi.getAll(params)

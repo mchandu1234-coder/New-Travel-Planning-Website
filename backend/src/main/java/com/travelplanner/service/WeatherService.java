@@ -28,30 +28,42 @@ public class WeatherService {
 
         if (city != null) {
             String lower = city.toLowerCase();
-            if (lower.contains("tokyo")) {
+            if (lower.contains("tokyo") || lower.contains("kyoto")) {
                 baseTemp = 19.5;
                 defaultCondition = "Clear Skies";
                 defaultIcon = "sun";
-            } else if (lower.contains("paris")) {
+            } else if (lower.contains("paris") || lower.contains("london") || lower.contains("amsterdam")) {
                 baseTemp = 17.0;
                 defaultCondition = "Partly Cloudy";
                 defaultIcon = "cloud-sun";
-            } else if (lower.contains("bali") || lower.contains("ubud")) {
-                baseTemp = 29.0;
-                defaultCondition = "Tropical Breeze";
+            } else if (lower.contains("bali") || lower.contains("ubud") || lower.contains("maldives") || lower.contains("hawaii") || lower.contains("maui")) {
+                baseTemp = 29.5;
+                defaultCondition = "Tropical Sun & Ocean Breeze";
                 defaultIcon = "sun";
-            } else if (lower.contains("amalfi") || lower.contains("positano")) {
-                baseTemp = 24.5;
+            } else if (lower.contains("amalfi") || lower.contains("positano") || lower.contains("santorini") || lower.contains("rome") || lower.contains("barcelona") || lower.contains("venice")) {
+                baseTemp = 25.0;
                 defaultCondition = "Sunny Mediterranean";
                 defaultIcon = "sun";
-            } else if (lower.contains("reykjavik") || lower.contains("iceland")) {
-                baseTemp = 8.0;
-                defaultCondition = "Crisp & Northern Lights";
+            } else if (lower.contains("reykjavik") || lower.contains("iceland") || lower.contains("banff") || lower.contains("swiss") || lower.contains("interlaken")) {
+                baseTemp = 9.0;
+                defaultCondition = "Crisp Mountain Air";
                 defaultIcon = "cloud";
-            } else if (lower.contains("cape town")) {
-                baseTemp = 21.0;
+            } else if (lower.contains("dubai") || lower.contains("cairo") || lower.contains("petra") || lower.contains("marrakech")) {
+                baseTemp = 32.0;
+                defaultCondition = "Warm & Golden Skies";
+                defaultIcon = "sun";
+            } else if (lower.contains("cape town") || lower.contains("sydney") || lower.contains("rio")) {
+                baseTemp = 23.5;
                 defaultCondition = "Sunny Ocean Breeze";
                 defaultIcon = "sun";
+            } else if (lower.contains("singapore") || lower.contains("bangkok") || lower.contains("seoul") || lower.contains("agra")) {
+                baseTemp = 28.0;
+                defaultCondition = "Warm & Bright";
+                defaultIcon = "sun";
+            } else if (latitude != null) {
+                double absLat = Math.abs(latitude);
+                baseTemp = Math.max(5.0, 32.0 - (absLat * 0.45));
+                defaultCondition = baseTemp > 24 ? "Sunny" : (baseTemp > 14 ? "Mild & Pleasant" : "Cool Breeze");
             }
         }
 

@@ -38,7 +38,7 @@ public class DestinationController {
             @RequestParam(required = false) BigDecimal maxCost,
             @RequestParam(required = false) BigDecimal minRating,
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "12") int size) {
+            @RequestParam(defaultValue = "100") int size) {
         Page<DestinationResponse> destinations = destinationService.searchDestinations(query, continent, maxCost, minRating, page, size);
         return ResponseEntity.ok(ApiResponse.ok(destinations));
     }
