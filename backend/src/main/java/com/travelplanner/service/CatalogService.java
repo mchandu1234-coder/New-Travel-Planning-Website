@@ -34,13 +34,32 @@ public class CatalogService {
         this.userRepository = userRepository;
     }
 
-    @Cacheable(value = "activities", key = "#destinationId")
-    public List<Activity> getActivitiesByDestination(Long destinationId) {
+    public List<Activity> getActivitiesByDestination(Long destinationId, String category) {
+        if (destinationId == null) {
+            return activityRepository.findAll();
+        }
+        if (category != null && !category.isBlank()) {
+            return activityRepository.findByDestinationIdAndCategoryIgnoreCase(destinationId, category);
+        }
         return activityRepository.findByDestinationId(destinationId);
     }
 
-    public List<Restaurant> getRestaurantsByDestination(Long destinationId) {
+    public List<Activity> getActivitiesByDestination(Long destinationId) {
+        return getActivitiesByDestination(destinationId, null);
+    }
+
+    public List<Restaurant> getRestaurantsByDestination(Long destinationId, String cuisine) {
+        if (destinationId == null) {
+            return restaurantRepository.findAll();
+        }
+        if (cuisine != null && !cuisine.isBlank()) {
+            return restaurantRepository.findByDestinationIdAndCuisineTypeContainingIgnoreCase(destinationId, cuisine);
+        }
         return restaurantRepository.findByDestinationId(destinationId);
+    }
+
+    public List<Restaurant> getRestaurantsByDestination(Long destinationId) {
+        return getRestaurantsByDestination(destinationId, null);
     }
 
     public List<Review> getReviews(Review.EntityType entityType, Long entityId) {

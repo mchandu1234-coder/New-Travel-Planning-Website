@@ -31,6 +31,10 @@ export default function BudgetTrackerPage() {
   const [errorMsg, setErrorMsg] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
+  // Interactive Filter and Group Split Simulator state
+  const [selectedCategory, setSelectedCategory] = useState('ALL');
+  const [splitTravelers, setSplitTravelers] = useState(3);
+
   // Form state for logging expense
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('FOOD_DRINK');
@@ -125,29 +129,29 @@ export default function BudgetTrackerPage() {
   const percentageSpent = Math.min(100, Math.round((summary.totalSpent / (allocatedBudget || 1)) * 100));
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 bg-mesh pb-20">
+    <div className="min-h-screen bg-[#f7faf9] bg-mesh text-slate-900 py-10 pb-20">
       <div className="max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div>
-            <Link to={`/trips/${id}`} className="text-xs font-bold text-cyan-400 hover:underline flex items-center space-x-1 mb-2">
+            <Link to={`/trips/${id}`} className="text-xs font-bold text-cyan-700 hover:underline flex items-center space-x-1 mb-2">
               <ArrowLeft className="w-3.5 h-3.5" />
               <span>Back to Trip Command Center</span>
             </Link>
-            <h1 className="text-3xl font-black text-slate-100 font-heading">
+            <h1 className="text-3xl font-black text-blue-950 font-heading">
               Budget Tracker & Split-Expense Calculator
             </h1>
           </div>
 
-          <div className="flex items-center space-x-2 bg-slate-900 p-1.5 rounded-2xl border border-slate-800">
-            <span className="text-xs text-slate-400 font-bold px-2">Display Currency:</span>
+          <div className="flex items-center space-x-2 bg-slate-100 p-1.5 rounded-2xl border border-slate-200">
+            <span className="text-xs text-slate-700 font-bold px-2">Display Currency:</span>
             {['USD', 'EUR', 'GBP', 'INR', 'JPY'].map((c) => (
               <button
                 key={c}
                 onClick={() => setTargetCurrency(c)}
                 className={`px-3 py-1 rounded-xl text-xs font-extrabold transition ${
-                  targetCurrency === c ? 'bg-emerald-500 text-slate-950' : 'text-slate-400 hover:text-slate-200'
+                  targetCurrency === c ? 'bg-emerald-600 text-white shadow-sm' : 'text-slate-700 hover:text-slate-950'
                 }`}
               >
                 {c}
@@ -159,54 +163,54 @@ export default function BudgetTrackerPage() {
         {/* Total Budget vs Spent Cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
-          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">Target Budget</span>
-            <div className="text-3xl font-black text-slate-100 font-heading">
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-2 shadow-sm">
+            <span className="text-xs font-extrabold text-slate-600 uppercase">Target Budget</span>
+            <div className="text-3xl font-black text-slate-900 font-heading">
               {summary.currency} ${typeof allocatedBudget === 'number' ? allocatedBudget.toFixed(2) : allocatedBudget}
             </div>
-            <p className="text-[11px] text-slate-500">Allocated trip limit</p>
+            <p className="text-[11px] text-slate-600 font-medium">Allocated trip limit</p>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">Total Spent</span>
-            <div className="text-3xl font-black text-emerald-400 font-heading">
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-2 shadow-sm">
+            <span className="text-xs font-extrabold text-slate-600 uppercase">Total Spent</span>
+            <div className="text-3xl font-black text-emerald-800 font-heading">
               {summary.currency} ${summary.totalSpent?.toFixed(2)}
             </div>
-            <div className="w-full bg-slate-950 h-2 rounded-full overflow-hidden mt-2 border border-slate-800">
+            <div className="w-full bg-slate-100 h-2 rounded-full overflow-hidden mt-2 border border-slate-200">
               <div
-                className="bg-gradient-to-r from-emerald-400 to-cyan-500 h-full rounded-full transition-all duration-500"
+                className="bg-gradient-to-r from-emerald-500 to-cyan-600 h-full rounded-full transition-all duration-500"
                 style={{ width: `${percentageSpent}%` }}
               />
             </div>
           </div>
 
-          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-2">
-            <span className="text-xs font-bold text-slate-400 uppercase">Remaining Balance</span>
-            <div className={`text-3xl font-black font-heading ${summary.remainingBudget >= 0 ? 'text-cyan-400' : 'text-rose-400'}`}>
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-2 shadow-sm">
+            <span className="text-xs font-extrabold text-slate-600 uppercase">Remaining Balance</span>
+            <div className={`text-3xl font-black font-heading ${summary.remainingBudget >= 0 ? 'text-cyan-800' : 'text-rose-800'}`}>
               {summary.currency} ${summary.remainingBudget?.toFixed(2)}
             </div>
-            <p className="text-[11px] text-slate-500">{percentageSpent}% of total budget used</p>
+            <p className="text-[11px] text-slate-600 font-medium">{percentageSpent}% of total budget used</p>
           </div>
 
         </div>
 
         {/* Section: Who Owes Whom (Simplified Debt Engine) */}
         {summary.simplifiedDebts && summary.simplifiedDebts.length > 0 && (
-          <div className="glass-panel p-6 rounded-3xl border border-indigo-500/30 bg-indigo-500/5 space-y-4">
-            <div className="flex items-center space-x-2 text-indigo-400 font-bold font-heading text-lg">
-              <Users className="w-5 h-5" />
+          <div className="p-6 rounded-3xl border border-indigo-200 bg-indigo-50/70 space-y-4 shadow-sm">
+            <div className="flex items-center space-x-2 text-indigo-950 font-bold font-heading text-lg">
+              <Users className="w-5 h-5 text-indigo-700" />
               <h3>Who Owes Whom — Simplified Debt Settlements</h3>
             </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {summary.simplifiedDebts.map((debt, index) => (
-                <div key={index} className="p-4 bg-slate-900/90 rounded-2xl border border-slate-800 flex items-center justify-between">
+                <div key={index} className="p-4 bg-white rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm">
                   <div className="flex items-center space-x-3 text-xs">
-                    <span className="font-bold text-rose-400">{debt.fromUser}</span>
-                    <ArrowRight className="w-4 h-4 text-slate-500" />
-                    <span className="font-bold text-emerald-400">{debt.toUser}</span>
+                    <span className="font-bold text-rose-700">{debt.fromUser}</span>
+                    <ArrowRight className="w-4 h-4 text-slate-400" />
+                    <span className="font-bold text-emerald-700">{debt.toUser}</span>
                   </div>
                   <div className="text-right">
-                    <span className="text-base font-black text-cyan-400">{debt.currency} ${debt.amount?.toFixed(2)}</span>
+                    <span className="text-base font-black text-cyan-800">{debt.currency} ${debt.amount?.toFixed(2)}</span>
                   </div>
                 </div>
               ))}
@@ -218,8 +222,8 @@ export default function BudgetTrackerPage() {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
           
           {/* Pie Chart */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
-            <h3 className="text-lg font-bold text-slate-100 font-heading">Expense Breakdown by Category</h3>
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-blue-950 font-heading">Expense Breakdown by Category</h3>
             <div className="h-64">
               {pieChartData.length > 0 ? (
                 <ResponsiveContainer width="100%" height="100%">
@@ -238,14 +242,14 @@ export default function BudgetTrackerPage() {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ backgroundColor: '#0f172a', borderColor: '#334155', borderRadius: '12px' }}
-                      itemStyle={{ color: '#38bdf8', fontWeight: 'bold' }}
+                      contentStyle={{ backgroundColor: '#ffffff', borderColor: '#e2e8f0', borderRadius: '12px', color: '#0f172a' }}
+                      itemStyle={{ color: '#0f172a', fontWeight: 'bold' }}
                     />
                     <Legend />
                   </PieChart>
                 </ResponsiveContainer>
               ) : (
-                <div className="h-full flex items-center justify-center text-xs text-slate-500">
+                <div className="h-full flex items-center justify-center text-xs text-slate-600 font-medium">
                   No expenses logged yet.
                 </div>
               )}
@@ -253,42 +257,42 @@ export default function BudgetTrackerPage() {
           </div>
 
           {/* Add Expense Form */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
-            <h3 className="text-lg font-bold text-slate-100 font-heading">Log New Expense</h3>
+          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+            <h3 className="text-lg font-bold text-blue-950 font-heading">Log New Expense</h3>
 
             {successMsg && (
-              <div className="p-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl text-emerald-300 text-xs font-bold flex items-center space-x-2 animate-in fade-in duration-200">
-                <CheckCircle2 className="w-4 h-4 text-emerald-400" />
+              <div className="p-3 bg-emerald-50 border border-emerald-200 rounded-xl text-emerald-800 text-xs font-bold flex items-center space-x-2 animate-in fade-in duration-200">
+                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
                 <span>{successMsg}</span>
               </div>
             )}
 
             {errorMsg && (
-              <div className="p-3 bg-rose-500/10 border border-rose-500/30 rounded-xl text-rose-300 text-xs font-bold animate-in fade-in duration-200">
+              <div className="p-3 bg-rose-50 border border-rose-200 rounded-xl text-rose-800 text-xs font-bold animate-in fade-in duration-200">
                 <span>{errorMsg}</span>
               </div>
             )}
 
             <form onSubmit={handleAddExpense} className="space-y-4">
               <div>
-                <label className="block text-xs font-bold text-slate-300 mb-1">Expense Title</label>
+                <label className="block text-xs font-extrabold text-slate-800 mb-1">Expense Title</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Group Dinner at Trattoria"
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full glass-input text-xs"
+                  className="w-full glass-input text-xs text-slate-900"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Category</label>
+                  <label className="block text-xs font-extrabold text-slate-800 mb-1">Category</label>
                   <select
                     value={category}
                     onChange={(e) => setCategory(e.target.value)}
-                    className="w-full glass-input text-xs cursor-pointer"
+                    className="w-full glass-input text-xs cursor-pointer text-slate-900"
                   >
                     <option value="FOOD_DRINK">Food & Dining</option>
                     <option value="FLIGHTS">Flight</option>
@@ -301,7 +305,7 @@ export default function BudgetTrackerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Amount</label>
+                  <label className="block text-xs font-extrabold text-slate-800 mb-1">Amount</label>
                   <input
                     type="number"
                     step="0.01"
@@ -309,18 +313,18 @@ export default function BudgetTrackerPage() {
                     placeholder="120.00"
                     value={amount}
                     onChange={(e) => setAmount(e.target.value)}
-                    className="w-full glass-input text-xs"
+                    className="w-full glass-input text-xs text-slate-900"
                   />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Currency</label>
+                  <label className="block text-xs font-extrabold text-slate-800 mb-1">Currency</label>
                   <select
                     value={expenseCurrency}
                     onChange={(e) => setExpenseCurrency(e.target.value)}
-                    className="w-full glass-input text-xs cursor-pointer"
+                    className="w-full glass-input text-xs cursor-pointer text-slate-900"
                   >
                     <option value="USD">USD</option>
                     <option value="EUR">EUR</option>
@@ -331,12 +335,12 @@ export default function BudgetTrackerPage() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-slate-300 mb-1">Expense Date</label>
+                  <label className="block text-xs font-extrabold text-slate-800 mb-1">Expense Date</label>
                   <input
                     type="date"
                     value={expenseDate}
                     onChange={(e) => setExpenseDate(e.target.value)}
-                    className="w-full glass-input text-xs"
+                    className="w-full glass-input text-xs text-slate-900"
                   />
                 </div>
               </div>
@@ -344,7 +348,7 @@ export default function BudgetTrackerPage() {
               <button
                 type="submit"
                 disabled={submitting}
-                className="w-full py-3 bg-gradient-to-r from-emerald-400 to-cyan-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition hover:opacity-95 disabled:opacity-50"
+                className="w-full py-3 bg-gradient-to-r from-emerald-500 to-teal-600 text-white font-black rounded-xl text-xs shadow-lg shadow-emerald-500/20 transition hover:opacity-95 disabled:opacity-50"
               >
                 {submitting ? 'Recording Expense...' : 'Log Expense'}
               </button>
@@ -353,40 +357,143 @@ export default function BudgetTrackerPage() {
 
         </div>
 
-        {/* Expenses List */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800 space-y-4">
-          <h3 className="text-lg font-bold text-slate-100 font-heading">Recent Logged Expenses ({expenses.length})</h3>
-          {expenses.length > 0 ? (
-            <div className="space-y-3">
-              {expenses.map((exp) => (
-                <div key={exp.id} className="p-4 bg-slate-950/60 rounded-2xl border border-slate-800 flex items-center justify-between">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 rounded-xl bg-slate-900 text-cyan-400 text-xs font-bold uppercase">
-                      {exp.category}
-                    </div>
-                    <div>
-                      <h5 className="font-bold text-xs text-slate-100">{exp.title}</h5>
-                      <span className="text-[10px] text-slate-400">{exp.date} • Paid by {exp.paidBy?.fullName || exp.paidByUser?.fullName || 'Member'}</span>
-                    </div>
-                  </div>
-
-                  <div className="flex items-center space-x-4">
-                    <span className="text-sm font-black text-emerald-400">
-                      {exp.currency || 'USD'} ${typeof exp.amount === 'number' ? exp.amount.toFixed(2) : exp.amount}
-                    </span>
-                    <button
-                      onClick={() => handleDeleteExpense(exp.id)}
-                      className="text-slate-500 hover:text-rose-400 transition p-1.5"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  </div>
+        {/* Interactive Group Split Simulator Card */}
+        {summary && (
+          <div className="bg-white p-6 rounded-3xl border border-slate-200 shadow-sm space-y-4">
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-slate-100 pb-3">
+              <div className="flex items-center space-x-2">
+                <div className="p-2 bg-teal-50 text-teal-800 rounded-xl">
+                  <Users className="w-4 h-4" />
                 </div>
+                <div>
+                  <h4 className="text-sm font-black text-blue-950 font-heading">Interactive Group Split Simulator</h4>
+                  <p className="text-[11px] text-slate-600 font-medium">Real-time equal share calculation across travelers</p>
+                </div>
+              </div>
+
+              <div className="text-right">
+                <span className="text-[10px] uppercase font-extrabold text-slate-600 block">Each Person Owes</span>
+                <span className="text-xl font-black text-teal-700 font-heading">
+                  ${((summary.totalSpent || 0) / splitTravelers).toFixed(2)}
+                </span>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 items-center pt-1">
+              <div className="md:col-span-2 space-y-1.5 bg-slate-50 p-3.5 rounded-2xl border border-slate-200">
+                <div className="flex justify-between text-xs font-bold">
+                  <span className="text-slate-700">Split Among Travelers:</span>
+                  <span className="text-teal-800 font-extrabold">{splitTravelers} People</span>
+                </div>
+                <input
+                  type="range"
+                  min="2"
+                  max="8"
+                  value={splitTravelers}
+                  onChange={(e) => setSplitTravelers(Number(e.target.value))}
+                  className="w-full accent-teal-600 cursor-pointer h-2"
+                />
+                <div className="flex justify-between text-[10px] text-slate-600 font-semibold pt-0.5">
+                  <span>2 Duo</span>
+                  <span>4 Small Group</span>
+                  <span>6 Family</span>
+                  <span>8 Large Crew</span>
+                </div>
+              </div>
+
+              <div className="p-3.5 bg-teal-50/80 rounded-2xl border border-teal-200 text-center">
+                <span className="text-[10px] uppercase font-bold text-teal-900 block">Total Group Pot</span>
+                <span className="text-lg font-black text-teal-950 font-heading">
+                  ${(summary.totalSpent || 0).toFixed(2)}
+                </span>
+                <p className="text-[10px] text-teal-800 mt-0.5 font-medium">
+                  {summary.totalBudget ? `Remaining: $${Math.max(0, (summary.totalBudget - summary.totalSpent) / splitTravelers).toFixed(2)} / person` : 'Active trip'}
+                </p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Expenses List with Interactive Category Filter */}
+        <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 shadow-sm">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <h3 className="text-lg font-bold text-blue-950 font-heading">
+              Logged Expenses ({expenses.length})
+            </h3>
+
+            {/* Interactive Category Filter Pills */}
+            <div className="flex flex-wrap gap-1.5">
+              {[
+                { id: 'ALL', label: 'All' },
+                { id: 'FOOD_DRINK', label: 'Food & Dining' },
+                { id: 'FLIGHTS', label: 'Flights' },
+                { id: 'STAYS', label: 'Stays' },
+                { id: 'ACTIVITIES', label: 'Activities' },
+                { id: 'TRANSPORT', label: 'Transit' },
+              ].map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setSelectedCategory(tab.id)}
+                  className={`px-3 py-1 rounded-xl text-xs font-bold transition ${
+                    selectedCategory === tab.id
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
+                  }`}
+                >
+                  {tab.label}
+                </button>
               ))}
             </div>
-          ) : (
-            <p className="text-xs text-slate-500">No expenses recorded yet.</p>
-          )}
+          </div>
+
+          {/* Filtered Expenses Output */}
+          {(() => {
+            const filtered = selectedCategory === 'ALL'
+              ? expenses
+              : expenses.filter(exp => {
+                  const cat = (exp.category || '').toUpperCase();
+                  if (selectedCategory === 'FOOD_DRINK') return cat.includes('FOOD') || cat.includes('DRINK') || cat.includes('RESTAURANT');
+                  if (selectedCategory === 'FLIGHTS') return cat.includes('FLIGHT');
+                  if (selectedCategory === 'STAYS') return cat.includes('STAY') || cat.includes('HOTEL') || cat.includes('ACCOMMODATION');
+                  if (selectedCategory === 'ACTIVITIES') return cat.includes('ACTIVITY') || cat.includes('SIGHT');
+                  if (selectedCategory === 'TRANSPORT') return cat.includes('TRANS') || cat.includes('TAXI');
+                  return cat === selectedCategory;
+                });
+
+            return filtered.length > 0 ? (
+              <div className="space-y-3">
+                {filtered.map((exp) => (
+                  <div key={exp.id} className="p-4 bg-white rounded-2xl border border-slate-200 flex items-center justify-between shadow-sm hover:border-teal-500/40 transition">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 rounded-xl bg-cyan-50 border border-cyan-200 text-cyan-800 text-xs font-bold uppercase">
+                        {exp.category}
+                      </div>
+                      <div>
+                        <h5 className="font-bold text-xs text-slate-900">{exp.title}</h5>
+                        <span className="text-[10px] text-slate-600 font-medium">{exp.date} • Paid by {exp.paidBy?.fullName || exp.paidByUser?.fullName || 'Member'}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center space-x-4">
+                      <span className="text-sm font-black text-emerald-800">
+                        {exp.currency || 'USD'} ${typeof exp.amount === 'number' ? exp.amount.toFixed(2) : exp.amount}
+                      </span>
+                      <button
+                        onClick={() => handleDeleteExpense(exp.id)}
+                        className="text-slate-400 hover:text-rose-600 transition p-1.5"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <p className="text-xs text-slate-600 font-medium py-4 text-center">
+                No expenses found in category "{selectedCategory}".
+              </p>
+            );
+          })()}
         </div>
 
       </div>

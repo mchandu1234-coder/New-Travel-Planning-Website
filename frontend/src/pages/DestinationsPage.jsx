@@ -1,9 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { destinationApi } from '../api/client';
-import { Search, MapPin, Star, Compass } from 'lucide-react';
+import { 
+  Search, MapPin, Star, Compass, Heart, Eye, 
+  ArrowUpDown, LayoutGrid, List, X, Sparkles, ArrowRight, Check 
+} from 'lucide-react';
+import { RetentionBarIcon } from '../components/BrandLogo';
 
-const CONTINENTS = ['All', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
+const CONTINENTS = ['All', 'Saved', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
 const VIBES = ['All', 'Cultural', 'Tropical', 'Urban', 'Mountain', 'Historical', 'Romance', 'Adventure', 'Modern'];
 
 export default function DestinationsPage() {
@@ -20,6 +24,28 @@ export default function DestinationsPage() {
   const [selectedContinent, setSelectedContinent] = useState(queryContinent);
   const [selectedVibe, setSelectedVibe] = useState(queryVibe);
   const [maxBudget, setMaxBudget] = useState(500);
+  const [sortBy, setSortBy] = useState('recommended');
+  const [viewMode, setViewMode] = useState('grid');
+  const [quickPeekDest, setQuickPeekDest] = useState(null);
+
+  // Favorites stored in localStorage
+  const [favorites, setFavorites] = useState(() => {
+    try {
+      return JSON.parse(localStorage.getItem('wanderlust_favs') || '[]');
+    } catch {
+      return [];
+    }
+  });
+
+  const toggleFavorite = (e, destId) => {
+    e.stopPropagation();
+    setFavorites((prev) => {
+      const exists = prev.includes(destId);
+      const next = exists ? prev.filter((id) => id !== destId) : [...prev, destId];
+      localStorage.setItem('wanderlust_favs', JSON.stringify(next));
+      return next;
+    });
+  };
 
   useEffect(() => {
     fetchDestinations();
@@ -28,7 +54,9 @@ export default function DestinationsPage() {
   const fetchDestinations = () => {
     setLoading(true);
     const params = { size: 100 };
-    if (selectedContinent !== 'All') params.continent = selectedContinent;
+    if (selectedContinent !== 'All' && selectedContinent !== 'Saved') {
+      params.continent = selectedContinent;
+    }
 
     destinationApi.getAll(params)
       .then((res) => {
@@ -50,54 +78,70 @@ export default function DestinationsPage() {
     
     const matchesBudget = cost <= maxBudget;
 
+    let matchesContinent = true;
+    if (selectedContinent === 'Saved') {
+      matchesContinent = favorites.includes(dest.id);
+    }
+
     let matchesVibe = true;
     if (selectedVibe !== 'All') {
       const vibeStr = Array.isArray(dest.vibeTags) ? dest.vibeTags.join(' ') : (dest.vibeTags || dest.vibe || '');
       matchesVibe = vibeStr.toLowerCase().includes(selectedVibe.toLowerCase());
     }
 
-    return matchesSearch && matchesBudget && matchesVibe;
+    return matchesSearch && matchesBudget && matchesContinent && matchesVibe;
+  }).sort((a, b) => {
+    const costA = a.averageDailyCost || a.avgCostPerDay || 100;
+    const costB = b.averageDailyCost || b.avgCostPerDay || 100;
+    const ratingA = a.rating || 4.5;
+    const ratingB = b.rating || 4.5;
+
+    if (sortBy === 'priceAsc') return costA - costB;
+    if (sortBy === 'priceDesc') return costB - costA;
+    if (sortBy === 'rating') return ratingB - ratingA;
+    if (sortBy === 'name') return a.name.localeCompare(b.name);
+    return 0;
   });
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 py-10 bg-mesh">
+    <div className="min-h-screen bg-mesh text-slate-900 py-10 pb-20">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-cyan-500/10 border border-cyan-500/20 text-cyan-400 text-xs font-bold">
+          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold">
             <Compass className="w-3.5 h-3.5" />
-            <span>Global Destinations Catalog</span>
+            <span>GLOBAL DESTINATIONS CATALOG</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-slate-100 font-heading">
+          <h1 className="text-3xl sm:text-5xl font-black text-blue-950 font-heading">
             Discover Your Next Escapade
           </h1>
-          <p className="text-sm text-slate-400">
+          <p className="text-sm text-slate-700 font-medium">
             Filter through world-famous cities, tropical islands, and cultural gems.
           </p>
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="glass-panel p-6 rounded-3xl border border-slate-800/80 mb-10 space-y-6">
+        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm mb-10 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
             {/* Search Input */}
             <div className="relative md:col-span-2">
-              <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+              <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
                 placeholder="Search city, country, or keyword..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full glass-input pl-10 text-xs"
+                className="w-full glass-input pl-10 text-xs text-slate-900 placeholder:text-slate-500 font-medium"
               />
             </div>
 
             {/* Price Slider */}
-            <div className="bg-slate-950/60 p-3 rounded-2xl border border-slate-800/80">
+            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
               <div className="flex justify-between items-center text-xs font-bold mb-1">
-                <span className="text-slate-400">Max Daily Budget</span>
-                <span className="text-cyan-400 font-black">${maxBudget} / day</span>
+                <span className="text-slate-700 font-bold">Max Daily Budget</span>
+                <span className="text-teal-700 font-black">${maxBudget} / day</span>
               </div>
               <input
                 type="range"
@@ -106,7 +150,7 @@ export default function DestinationsPage() {
                 step="25"
                 value={maxBudget}
                 onChange={(e) => setMaxBudget(Number(e.target.value))}
-                className="w-full accent-cyan-400 cursor-pointer"
+                className="w-full accent-teal-600 cursor-pointer"
               />
             </div>
 
@@ -114,16 +158,16 @@ export default function DestinationsPage() {
 
           {/* Continent Pills */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Continent</label>
+            <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Continent</label>
             <div className="flex flex-wrap gap-2">
               {CONTINENTS.map((c) => (
                 <button
                   key={c}
                   onClick={() => setSelectedContinent(c)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition ${
                     selectedContinent === c
-                      ? 'bg-cyan-500 text-slate-950 shadow-md shadow-cyan-500/20'
-                      : 'bg-slate-900 text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                      ? 'bg-slate-900 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
                   }`}
                 >
                   {c}
@@ -134,16 +178,16 @@ export default function DestinationsPage() {
 
           {/* Vibe Pills */}
           <div>
-            <label className="block text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-2">Vibe & Atmosphere</label>
+            <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Vibe & Atmosphere</label>
             <div className="flex flex-wrap gap-2">
               {VIBES.map((v) => (
                 <button
                   key={v}
                   onClick={() => setSelectedVibe(v)}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition ${
                     selectedVibe === v
-                      ? 'bg-indigo-500 text-slate-100 shadow-md shadow-indigo-500/20'
-                      : 'bg-slate-900 text-slate-400 hover:text-slate-100 hover:bg-slate-800'
+                      ? 'bg-teal-600 text-white shadow-sm'
+                      : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
                   }`}
                 >
                   {v}
@@ -153,78 +197,165 @@ export default function DestinationsPage() {
           </div>
         </div>
 
-        {/* Results Count */}
-        <div className="flex justify-between items-center mb-6">
-          <p className="text-xs font-bold text-slate-400">
-            Showing <span className="text-cyan-400">{filteredDestinations.length}</span> destinations
-          </p>
+        {/* Interactive Controls & View Bar */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-2">
+          <div className="flex items-center space-x-2">
+            <p className="text-xs font-extrabold text-slate-800">
+              Showing <span className="text-teal-700 font-black">{filteredDestinations.length}</span> destinations
+            </p>
+            {favorites.length > 0 && (
+              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200">
+                <Heart className="w-3 h-3 fill-rose-500 text-rose-500" />
+                <span>{favorites.length} Saved</span>
+              </span>
+            )}
+          </div>
+
+          <div className="flex items-center space-x-3">
+            {/* Sort By Dropdown */}
+            <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm text-xs">
+              <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
+              <span className="text-slate-600 font-bold hidden sm:inline">Sort:</span>
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value)}
+                className="bg-transparent font-bold text-slate-800 outline-none cursor-pointer"
+              >
+                <option value="recommended">Featured / Recommended</option>
+                <option value="priceAsc">Budget: Low to High</option>
+                <option value="priceDesc">Budget: High to Low</option>
+                <option value="rating">Highest Rating</option>
+                <option value="name">Alphabetical (A-Z)</option>
+              </select>
+            </div>
+
+            {/* View Mode Toggle */}
+            <div className="flex bg-white p-1 rounded-xl border border-slate-200 shadow-sm">
+              <button
+                onClick={() => setViewMode('grid')}
+                title="Grid Card View"
+                className={`p-1.5 rounded-lg transition ${
+                  viewMode === 'grid' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <LayoutGrid className="w-3.5 h-3.5" />
+              </button>
+              <button
+                onClick={() => setViewMode('table')}
+                title="Table Analytics View"
+                className={`p-1.5 rounded-lg transition ${
+                  viewMode === 'table' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <List className="w-3.5 h-3.5" />
+              </button>
+            </div>
+          </div>
         </div>
 
-        {/* Grid */}
+        {/* Grid or Table Results */}
         {loading ? (
           <div className="flex justify-center items-center py-20">
-            <div className="w-10 h-10 border-4 border-cyan-400 border-t-transparent rounded-full animate-spin" />
+            <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
           </div>
         ) : filteredDestinations.length === 0 ? (
-          <div className="text-center py-16 glass-panel rounded-3xl">
-            <Compass className="w-12 h-12 text-slate-600 mx-auto mb-3" />
-            <h3 className="text-lg font-bold text-slate-200">No destinations found</h3>
-            <p className="text-xs text-slate-400 mt-1">Try relaxing your search terms or filters.</p>
+          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200">
+            <Compass className="w-12 h-12 text-slate-500 mx-auto mb-3" />
+            <h3 className="text-lg font-black text-slate-900">No destinations found</h3>
+            <p className="text-xs text-slate-600 font-medium mt-1">Try relaxing your search terms or filters.</p>
+            {selectedContinent === 'Saved' && (
+              <button
+                onClick={() => setSelectedContinent('All')}
+                className="mt-3 text-xs font-bold text-teal-700 hover:underline"
+              >
+                View all destinations
+              </button>
+            )}
           </div>
-        ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        ) : viewMode === 'grid' ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {filteredDestinations.map((dest) => {
               const displayImage = dest.heroImageUrl || dest.imageUrl || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=800&q=80';
               const cost = dest.averageDailyCost || dest.avgCostPerDay || 150;
               const vibe = Array.isArray(dest.vibeTags) ? dest.vibeTags[0] : (typeof dest.vibeTags === 'string' ? dest.vibeTags.split(',')[0] : (dest.vibe || 'Cultural'));
+              const isFav = favorites.includes(dest.id);
 
               return (
                 <div
                   key={dest.id}
                   onClick={() => navigate(`/destinations/${dest.id}`)}
-                  className="group glass-panel rounded-3xl overflow-hidden border border-slate-800/80 hover:border-cyan-500/50 transition-all duration-500 cursor-pointer hover:-translate-y-2 hover:shadow-2xl hover:shadow-cyan-500/10"
+                  className="group bg-white rounded-3xl overflow-hidden border border-slate-200/80 hover:border-teal-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer relative flex flex-col justify-between"
                 >
-                  <div className="relative h-64 overflow-hidden">
+                  <div className="relative h-56 overflow-hidden">
                     <img
                       src={displayImage}
                       alt={dest.name}
-                      className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
                     
-                    {/* Rating */}
-                    <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur-md px-3 py-1 rounded-full border border-slate-800 flex items-center space-x-1 text-amber-400 text-xs font-bold">
-                      <Star className="w-3.5 h-3.5 fill-amber-400" />
-                      <span>{dest.rating || 4.8}</span>
+                    {/* Top Action Row: Vibe, Rating, Favorite, Quick Peek */}
+                    <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between">
+                      <div className="bg-teal-600 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                        {vibe}
+                      </div>
+
+                      <div className="flex items-center space-x-1.5">
+                        {/* Quick Peek Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setQuickPeekDest(dest);
+                          }}
+                          title="Quick Peek"
+                          className="bg-white/90 hover:bg-white text-slate-800 p-1.5 rounded-full shadow-sm backdrop-blur-md transition hover:scale-110"
+                        >
+                          <Eye className="w-3.5 h-3.5 text-teal-700" />
+                        </button>
+
+                        {/* Favorite Heart Button */}
+                        <button
+                          type="button"
+                          onClick={(e) => toggleFavorite(e, dest.id)}
+                          title={isFav ? 'Remove from Saved' : 'Save Destination'}
+                          className={`p-1.5 rounded-full shadow-sm backdrop-blur-md transition hover:scale-110 ${
+                            isFav ? 'bg-rose-500 text-white' : 'bg-white/90 hover:bg-white text-slate-700'
+                          }`}
+                        >
+                          <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-white text-white' : 'text-slate-700'}`} />
+                        </button>
+
+                        {/* Rating */}
+                        <div className="bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 flex items-center space-x-1 text-slate-800 text-xs font-bold shadow-sm">
+                          <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                          <span>{dest.rating || 4.8}</span>
+                        </div>
+                      </div>
                     </div>
 
-                    {/* Vibe */}
-                    <div className="absolute top-4 left-4 bg-cyan-500/20 backdrop-blur-md border border-cyan-500/30 text-cyan-300 px-3 py-1 rounded-full text-xs font-extrabold uppercase tracking-wider">
-                      {vibe}
-                    </div>
-
-                    <div className="absolute bottom-4 left-4 right-4">
-                      <h3 className="text-2xl font-black text-slate-100 font-heading">{dest.name}</h3>
-                      <div className="flex items-center space-x-1 text-slate-300 text-xs font-medium">
-                        <MapPin className="w-3.5 h-3.5 text-cyan-400" />
+                    <div className="absolute bottom-3.5 left-4 right-4">
+                      <h3 className="text-xl font-black text-white font-heading">{dest.name}</h3>
+                      <div className="flex items-center space-x-1 text-slate-200 text-xs font-medium">
+                        <MapPin className="w-3.5 h-3.5 text-teal-300" />
                         <span>{dest.country}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-5 space-y-4">
-                    <p className="text-xs text-slate-400 line-clamp-2 leading-relaxed">
+                  <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
+                    <p className="text-xs text-slate-700 line-clamp-2 leading-relaxed font-medium">
                       {dest.description}
                     </p>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-800/80 text-xs font-semibold text-slate-300">
+                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs font-bold text-slate-800">
                       <div>
-                        <span className="text-slate-500 text-[10px] uppercase block font-bold">Best Season</span>
-                        <span className="text-slate-200 font-bold">{dest.bestTimeToVisit || dest.bestSeason || 'Spring & Fall'}</span>
+                        <span className="text-slate-700 text-[10px] uppercase block font-extrabold">Best Season</span>
+                        <span className="text-slate-900 font-extrabold">{dest.bestTimeToVisit || dest.bestSeason || 'Spring & Fall'}</span>
                       </div>
                       <div className="text-right">
-                        <span className="text-slate-500 text-[10px] uppercase block font-bold">Est. Daily</span>
-                        <span className="text-emerald-400 font-black text-sm">${cost}</span>
+                        <span className="text-slate-700 text-[10px] uppercase block font-extrabold">Est. Daily</span>
+                        <span className="text-teal-700 font-black text-sm">${cost}</span>
                       </div>
                     </div>
                   </div>
@@ -232,9 +363,184 @@ export default function DestinationsPage() {
               );
             })}
           </div>
+        ) : (
+          /* Table / List View */
+          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200 text-[10px] font-extrabold uppercase tracking-wider text-slate-700">
+                    <th className="py-3 px-4">Destination</th>
+                    <th className="py-3 px-4">Continent</th>
+                    <th className="py-3 px-4">Rating</th>
+                    <th className="py-3 px-4">Best Season</th>
+                    <th className="py-3 px-4">Est. Daily Cost</th>
+                    <th className="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-100 font-medium text-slate-800">
+                  {filteredDestinations.map((dest) => {
+                    const cost = dest.averageDailyCost || dest.avgCostPerDay || 150;
+                    const isFav = favorites.includes(dest.id);
+                    return (
+                      <tr 
+                        key={dest.id}
+                        onClick={() => navigate(`/destinations/${dest.id}`)}
+                        className="hover:bg-teal-50/50 cursor-pointer transition"
+                      >
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-3">
+                            <img
+                              src={dest.heroImageUrl || dest.imageUrl || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=120&q=80'}
+                              alt={dest.name}
+                              className="w-10 h-10 rounded-xl object-cover"
+                            />
+                            <div>
+                              <div className="font-bold text-slate-900">{dest.name}</div>
+                              <div className="text-[11px] text-slate-600">{dest.country}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-700">{dest.continent}</td>
+                        <td className="py-3 px-4">
+                          <div className="flex items-center space-x-1 font-bold text-slate-900">
+                            <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
+                            <span>{dest.rating || 4.8}</span>
+                          </div>
+                        </td>
+                        <td className="py-3 px-4 text-slate-700 font-semibold">{dest.bestTimeToVisit || 'Spring & Fall'}</td>
+                        <td className="py-3 px-4">
+                          <span className="font-black text-teal-700">${cost}</span> / day
+                        </td>
+                        <td className="py-3 px-4 text-right">
+                          <div className="flex items-center justify-end space-x-2">
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setQuickPeekDest(dest);
+                              }}
+                              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition"
+                              title="Quick Peek"
+                            >
+                              <Eye className="w-4 h-4 text-teal-700" />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => toggleFavorite(e, dest.id)}
+                              className={`p-1.5 rounded-lg transition ${
+                                isFav ? 'bg-rose-50 text-rose-600' : 'hover:bg-slate-100 text-slate-500'
+                              }`}
+                              title="Favorite"
+                            >
+                              <Heart className={`w-4 h-4 ${isFav ? 'fill-rose-500 text-rose-500' : ''}`} />
+                            </button>
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/trips/new?destinationId=${dest.id}`);
+                              }}
+                              className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold transition"
+                            >
+                              Plan Trip
+                            </button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
         )}
 
       </div>
+
+      {/* Interactive Quick Peek Drawer / Modal */}
+      {quickPeekDest && (
+        <div 
+          onClick={() => setQuickPeekDest(null)}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/50 backdrop-blur-sm animate-in fade-in duration-200"
+        >
+          <div 
+            onClick={(e) => e.stopPropagation()}
+            className="bg-white rounded-3xl w-full max-w-lg border border-slate-200 shadow-2xl overflow-hidden animate-in zoom-in-95 duration-200"
+          >
+            <div className="relative h-56 overflow-hidden">
+              <img
+                src={quickPeekDest.heroImageUrl || quickPeekDest.imageUrl || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=1200&q=80'}
+                alt={quickPeekDest.name}
+                className="w-full h-full object-cover"
+              />
+              <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-slate-950/20 to-transparent" />
+              
+              <button
+                onClick={() => setQuickPeekDest(null)}
+                className="absolute top-4 right-4 p-2 bg-slate-900/60 hover:bg-slate-900 text-white rounded-full transition"
+              >
+                <X className="w-4 h-4" />
+              </button>
+
+              <div className="absolute bottom-4 left-5 right-5">
+                <div className="flex items-center space-x-2 text-xs font-semibold text-teal-300 mb-1">
+                  <MapPin className="w-3.5 h-3.5" />
+                  <span>{quickPeekDest.country} • {quickPeekDest.continent}</span>
+                </div>
+                <h3 className="text-2xl font-black text-white font-heading">{quickPeekDest.name}</h3>
+              </div>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div className="grid grid-cols-3 gap-3 text-center">
+                <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-extrabold uppercase text-slate-700 block">Est. Daily</span>
+                  <span className="text-base font-black text-teal-700">${quickPeekDest.averageDailyCost || 150}</span>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-extrabold uppercase text-slate-700 block">Rating</span>
+                  <span className="text-base font-black text-amber-500">★ {quickPeekDest.rating || 4.8}</span>
+                </div>
+                <div className="bg-slate-50 p-2.5 rounded-2xl border border-slate-200/80">
+                  <span className="text-[10px] font-extrabold uppercase text-slate-700 block">Best Season</span>
+                  <span className="text-xs font-bold text-slate-900 truncate block mt-0.5">{quickPeekDest.bestTimeToVisit || 'Spring'}</span>
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-700 font-medium leading-relaxed">
+                {quickPeekDest.description}
+              </p>
+
+              <div className="flex items-center space-x-3 pt-2">
+                <button
+                  onClick={() => {
+                    const dest = quickPeekDest;
+                    setQuickPeekDest(null);
+                    navigate(`/trips/new?destinationId=${dest.id}`);
+                  }}
+                  className="flex-1 py-3 btn-teal text-xs font-bold rounded-2xl shadow-sm flex items-center justify-center space-x-2"
+                >
+                  <Sparkles className="w-4 h-4" />
+                  <span>Plan Trip Here</span>
+                </button>
+                <button
+                  onClick={() => {
+                    const dest = quickPeekDest;
+                    setQuickPeekDest(null);
+                    navigate(`/destinations/${dest.id}`);
+                  }}
+                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold rounded-2xl transition flex items-center justify-center space-x-2"
+                >
+                  <span>Full Analytics</span>
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
+

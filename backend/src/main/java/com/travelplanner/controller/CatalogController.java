@@ -26,17 +26,25 @@ public class CatalogController {
         this.catalogService = catalogService;
     }
 
-    @GetMapping("/destinations/{destId}/activities")
+    @GetMapping({"/activities", "/destinations/{destId}/activities"})
     @Operation(summary = "Get all activities and sights for a destination")
-    public ResponseEntity<ApiResponse<List<Activity>>> getActivities(@PathVariable Long destId) {
-        List<Activity> activities = catalogService.getActivitiesByDestination(destId);
+    public ResponseEntity<ApiResponse<List<Activity>>> getActivities(
+            @PathVariable(required = false) Long destId,
+            @RequestParam(required = false) Long destinationId,
+            @RequestParam(required = false) String category) {
+        Long targetId = destId != null ? destId : destinationId;
+        List<Activity> activities = catalogService.getActivitiesByDestination(targetId, category);
         return ResponseEntity.ok(ApiResponse.ok(activities));
     }
 
-    @GetMapping("/destinations/{destId}/restaurants")
+    @GetMapping({"/restaurants", "/destinations/{destId}/restaurants"})
     @Operation(summary = "Get recommended restaurants for a destination")
-    public ResponseEntity<ApiResponse<List<Restaurant>>> getRestaurants(@PathVariable Long destId) {
-        List<Restaurant> restaurants = catalogService.getRestaurantsByDestination(destId);
+    public ResponseEntity<ApiResponse<List<Restaurant>>> getRestaurants(
+            @PathVariable(required = false) Long destId,
+            @RequestParam(required = false) Long destinationId,
+            @RequestParam(required = false) String cuisine) {
+        Long targetId = destId != null ? destId : destinationId;
+        List<Restaurant> restaurants = catalogService.getRestaurantsByDestination(targetId, cuisine);
         return ResponseEntity.ok(ApiResponse.ok(restaurants));
     }
 

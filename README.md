@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 # WanderLust — Next-Gen AI Travel Planning Suite
 
 WanderLust is a full-stack, enterprise-grade travel planning web application built with **Spring Boot 3.3.4 (Java 17/24)** on the backend and **React 18 + Tailwind CSS** on the frontend.
@@ -67,6 +66,4 @@ docker-compose up --build
 ```
 - Frontend app: `http://localhost`
 - Backend REST API: `http://localhost:8080/api`
-=======
-# New-Travel-Planning-Website
->>>>>>> de99b5b454e3cb0806af1e228e3c5cf3dcfba9b3
+

@@ -2,10 +2,10 @@ import React, { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { 
-  Compass, MapPin, Calendar, DollarSign, Users, Download, 
-  LogOut, User, Sparkles, ChevronDown, DollarSign as CurrencyIcon 
+  Compass, Calendar, LogOut, Sparkles, ChevronDown, Plus 
 } from 'lucide-react';
 import AuthModal from './AuthModal';
+import BrandLogo from './BrandLogo';
 
 const CURRENCIES = [
   { code: 'USD', symbol: '$' },
@@ -38,28 +38,14 @@ export default function Navbar() {
 
   return (
     <>
-      <nav className="sticky top-0 z-40 bg-slate-950/80 backdrop-blur-xl border-b border-slate-800/80 transition-all">
+      <nav className="sticky top-0 z-40 bg-white/90 backdrop-blur-xl border-b border-slate-200/80 transition-all">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex items-center justify-between h-20">
+          <div className="flex items-center justify-between h-18 py-3">
             {/* Logo */}
-            <Link to="/" className="flex items-center space-x-3 group">
-              <div className="w-11 h-11 rounded-2xl bg-gradient-to-tr from-cyan-500 via-sky-400 to-indigo-500 p-0.5 shadow-lg shadow-cyan-500/20 group-hover:scale-105 transition-transform duration-300">
-                <div className="w-full h-full bg-slate-950 rounded-[14px] flex items-center justify-center">
-                  <Compass className="w-6 h-6 text-cyan-400 group-hover:rotate-45 transition-transform duration-500" />
-                </div>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black tracking-tight text-slate-100 font-heading">
-                  Wander<span className="text-cyan-400">Lust</span>
-                </span>
-                <span className="text-[10px] uppercase font-bold tracking-widest text-slate-400 -mt-1">
-                  AI Trip Suite
-                </span>
-              </div>
-            </Link>
+            <BrandLogo />
 
             {/* Nav Links */}
-            <div className="hidden md:flex items-center space-x-1 bg-slate-900/60 p-1.5 rounded-full border border-slate-800/80">
+            <div className="hidden md:flex items-center space-x-1 bg-slate-100/90 p-1.5 rounded-full border border-slate-200/80">
               {navLinks.map((link) => {
                 const Icon = link.icon;
                 const isActive = location.pathname === link.path;
@@ -67,13 +53,13 @@ export default function Navbar() {
                   <Link
                     key={link.path}
                     to={link.path}
-                    className={`flex items-center space-x-2 px-4 py-2 rounded-full text-sm font-semibold transition-all duration-200 ${
+                    className={`flex items-center space-x-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all duration-200 ${
                       isActive
-                        ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-md shadow-cyan-500/20'
-                        : 'text-slate-300 hover:text-white hover:bg-slate-800/60'
+                        ? 'bg-slate-900 text-white shadow-sm'
+                        : 'text-slate-600 hover:text-slate-900 hover:bg-white'
                     }`}
                   >
-                    <Icon className="w-4 h-4" />
+                    <Icon className="w-3.5 h-3.5" />
                     <span>{link.label}</span>
                   </Link>
                 );
@@ -87,7 +73,7 @@ export default function Navbar() {
                 <select
                   value={selectedCurrency}
                   onChange={(e) => setSelectedCurrency(e.target.value)}
-                  className="bg-slate-900 border border-slate-800 text-slate-200 text-xs font-bold rounded-xl px-3 py-2 outline-none focus:border-cyan-500 cursor-pointer appearance-none pr-7 hover:border-slate-700 transition"
+                  className="bg-white border border-slate-200 text-slate-700 text-xs font-bold rounded-full px-3 py-1.5 outline-none focus:border-teal-500 cursor-pointer appearance-none pr-7 hover:border-slate-300 transition shadow-sm"
                 >
                   {CURRENCIES.map((c) => (
                     <option key={c.code} value={c.code}>
@@ -95,7 +81,7 @@ export default function Navbar() {
                     </option>
                   ))}
                 </select>
-                <ChevronDown className="w-3.5 h-3.5 text-slate-400 absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none" />
+                <ChevronDown className="w-3.5 h-3.5 text-slate-700 absolute right-2.5 top-1/2 -translate-y-1/2 pointer-events-none" />
               </div>
 
               {/* Auth state */}
@@ -103,32 +89,32 @@ export default function Navbar() {
                 <div className="relative">
                   <button
                     onClick={() => setShowUserMenu(!showUserMenu)}
-                    className="flex items-center space-x-3 bg-slate-900/80 hover:bg-slate-800 border border-slate-800/90 rounded-2xl p-1.5 pr-4 transition-all"
+                    className="flex items-center space-x-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-full p-1 pr-3.5 transition-all shadow-sm"
                   >
                     <img
                       src={user?.avatarUrl || `https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=120&q=80`}
                       alt={user?.fullName}
-                      className="w-8 h-8 rounded-xl object-cover border border-cyan-500/30"
+                      className="w-7 h-7 rounded-full object-cover border border-teal-500/30"
                     />
-                    <span className="text-sm font-semibold text-slate-200 hidden sm:inline">
+                    <span className="text-xs font-bold text-slate-800 hidden sm:inline">
                       {user?.fullName?.split(' ')[0]}
                     </span>
-                    <ChevronDown className="w-4 h-4 text-slate-400" />
+                    <ChevronDown className="w-3.5 h-3.5 text-slate-700" />
                   </button>
 
                   {/* Dropdown Menu */}
                   {showUserMenu && (
-                    <div className="absolute right-0 mt-2 w-56 glass-panel rounded-2xl p-2 z-50 animate-in fade-in slide-in-from-top-2 duration-200">
-                      <div className="px-3 py-2 border-b border-slate-800/80 mb-1">
-                        <p className="text-sm font-bold text-slate-100">{user?.fullName}</p>
-                        <p className="text-xs text-slate-400 truncate">{user?.email}</p>
+                    <div className="absolute right-0 mt-2 w-56 bg-white rounded-2xl p-2 z-50 shadow-xl border border-slate-200/90 animate-in fade-in duration-200">
+                      <div className="px-3 py-2 border-b border-slate-100 mb-1">
+                        <p className="text-xs font-bold text-slate-900">{user?.fullName}</p>
+                        <p className="text-[11px] text-slate-700 font-medium truncate">{user?.email}</p>
                       </div>
                       <Link
                         to="/dashboard"
                         onClick={() => setShowUserMenu(false)}
-                        className="flex items-center space-x-2 px-3 py-2.5 rounded-xl text-sm font-medium text-slate-300 hover:text-cyan-400 hover:bg-slate-800/60 transition"
+                        className="flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-slate-700 hover:text-teal-700 hover:bg-teal-50 transition"
                       >
-                        <Calendar className="w-4 h-4" />
+                        <Calendar className="w-3.5 h-3.5" />
                         <span>My Dashboard</span>
                       </Link>
                       <button
@@ -137,9 +123,9 @@ export default function Navbar() {
                           logout();
                           navigate('/');
                         }}
-                        className="w-full flex items-center space-x-2 px-3 py-2.5 rounded-xl text-sm font-medium text-rose-400 hover:bg-rose-500/10 transition"
+                        className="w-full flex items-center space-x-2 px-3 py-2 rounded-xl text-xs font-bold text-rose-600 hover:bg-rose-50 transition"
                       >
-                        <LogOut className="w-4 h-4" />
+                        <LogOut className="w-3.5 h-3.5" />
                         <span>Sign Out</span>
                       </button>
                     </div>
@@ -149,13 +135,13 @@ export default function Navbar() {
                 <div className="flex items-center space-x-2">
                   <button
                     onClick={() => openAuth('login')}
-                    className="px-4 py-2 text-sm font-semibold text-slate-300 hover:text-white transition"
+                    className="px-4 py-1.5 text-xs font-bold text-slate-700 hover:text-slate-900 transition"
                   >
                     Log In
                   </button>
                   <button
                     onClick={() => openAuth('register')}
-                    className="px-4 py-2 bg-gradient-to-r from-cyan-500 to-sky-500 hover:from-cyan-400 hover:to-sky-400 text-slate-950 font-bold rounded-xl text-sm shadow-lg shadow-cyan-500/20 hover:shadow-cyan-500/30 transition-all transform active:scale-95"
+                    className="px-5 py-1.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-full text-xs shadow-sm transition-all transform active:scale-95"
                   >
                     Get Started
                   </button>
@@ -177,3 +163,4 @@ export default function Navbar() {
     </>
   );
 }
+
