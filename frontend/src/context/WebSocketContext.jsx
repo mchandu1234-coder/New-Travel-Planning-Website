@@ -20,8 +20,9 @@ export const WebSocketProvider = ({ children }) => {
       return;
     }
 
+    const wsBase = import.meta.env.VITE_WS_URL || (import.meta.env.VITE_API_URL ? import.meta.env.VITE_API_URL.replace(/\/api\/?$/, '') : '');
     const client = new Client({
-      webSocketFactory: () => new SockJS('/ws-travel'),
+      webSocketFactory: () => new SockJS(`${wsBase}/ws-travel`),
       connectHeaders: {
         Authorization: `Bearer ${token}`,
       },

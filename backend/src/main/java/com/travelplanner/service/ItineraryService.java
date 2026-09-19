@@ -158,14 +158,20 @@ public class ItineraryService {
         List<ItineraryConflictDTO> conflicts = new ArrayList<>();
         if (items == null || items.size() < 2) return conflicts;
 
+        // Only detect schedule conflicts between active scheduled activities / tours / events
         List<ItineraryItem> timedItems = items.stream()
-                .filter(i -> i.getStartTime() != null)
+                .filter(i -> i.getStartTime() != null && i.getItemType() != ItineraryItem.ItemType.ACCOMMODATION)
                 .sorted(Comparator.comparing(ItineraryItem::getStartTime))
                 .collect(Collectors.toList());
 
         for (int i = 0; i < timedItems.size() - 1; i++) {
             ItineraryItem current = timedItems.get(i);
             ItineraryItem next = timedItems.get(i + 1);
+
+            // Skip if flight vs activity on departure day (handled at airport)
+            if (current.getItemType() == ItineraryItem.ItemType.FLIGHT && next.getItemType() != ItineraryItem.ItemType.FLIGHT) {
+                continue;
+            }
 
             LocalTime currentEnd = current.getEndTime() != null ? current.getEndTime() : current.getStartTime().plusHours(1);
             LocalTime nextStart = next.getStartTime();
@@ -178,15 +184,6 @@ public class ItineraryService {
                         .itemBId(next.getId())
                         .itemBTitle(next.getTitle())
                         .message("Schedule overlap between '" + current.getTitle() + "' and '" + next.getTitle() + "'")
-                        .build());
-            } else if (currentEnd.plusMinutes(15).isAfter(nextStart)) {
-                conflicts.add(ItineraryConflictDTO.builder()
-                        .type("TIGHT_BUFFER")
-                        .itemAId(current.getId())
-                        .itemATitle(current.getTitle())
-                        .itemBId(next.getId())
-                        .itemBTitle(next.getTitle())
-                        .message("Tight transit window (< 15 mins) between '" + current.getTitle() + "' and '" + next.getTitle() + "'")
                         .build());
             }
         }

@@ -67,3 +67,12 @@ docker-compose up --build
 - Frontend app: `http://localhost`
 - Backend REST API: `http://localhost:8080/api`
 
+---
+
+### Option 3: 100% Free Cloud Deployment (Vercel + Render)
+
+Deploy this full-stack project online for free with zero credit card required:
+- **Backend (Spring Boot)**: Deploy to [Render.com](https://render.com) using the included `backend/Dockerfile`.
+- **Frontend (React)**: Deploy to [Vercel](https://vercel.com) by pointing to the `frontend` folder.
+- **Complete Step-by-Step Guide**: See [DEPLOYMENT_GUIDE.md](DEPLOYMENT_GUIDE.md) for detailed click-by-click instructions.
+

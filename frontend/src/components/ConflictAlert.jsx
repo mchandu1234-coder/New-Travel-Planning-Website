@@ -1,39 +1,56 @@
-import React from 'react';
-import { AlertTriangle, Clock, ShieldAlert } from 'lucide-react';
+import React, { useState } from 'react';
+import { Sparkles, Clock, X, CheckCircle2 } from 'lucide-react';
 
-export default function ConflictAlert({ conflicts = [] }) {
-  if (!conflicts || conflicts.length === 0) return null;
+export default function ConflictAlert({ conflicts = [], onResolve, tripId }) {
+  const [dismissed, setDismissed] = useState(false);
+
+  if (dismissed || !conflicts || conflicts.length === 0) return null;
 
   return (
-    <div className="bg-amber-50 border border-amber-200 rounded-2xl p-4 mb-6 shadow-sm animate-in fade-in duration-300">
-      <div className="flex items-center space-x-2 text-amber-900 font-bold text-sm mb-2 font-heading">
-        <AlertTriangle className="w-5 h-5 text-amber-600 flex-shrink-0 animate-bounce" />
-        <span>Schedule Optimization & Conflict Warnings ({conflicts.length})</span>
+    <div className="bg-gradient-to-r from-cyan-50/90 to-sky-50/90 border border-cyan-200/80 rounded-2xl p-4 mb-6 shadow-sm animate-in fade-in duration-300 relative transition-all">
+      <div className="flex items-center justify-between mb-2">
+        <div className="flex items-center space-x-2 text-cyan-950 font-bold text-sm font-heading">
+          <Sparkles className="w-4 h-4 text-cyan-600 flex-shrink-0" />
+          <span>Smart Schedule Assistant ({conflicts.length} time note{conflicts.length > 1 ? 's' : ''})</span>
+        </div>
+        <div className="flex items-center space-x-2">
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            className="flex items-center space-x-1 px-2.5 py-1 text-xs font-semibold text-slate-600 hover:text-slate-900 bg-white/80 hover:bg-white border border-slate-200 rounded-lg shadow-2xs transition"
+            title="Dismiss suggestions"
+          >
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            <span>Mark All as OK</span>
+          </button>
+          <button
+            type="button"
+            onClick={() => setDismissed(true)}
+            className="p-1 text-slate-400 hover:text-slate-700 rounded-lg hover:bg-white/80 transition"
+            aria-label="Dismiss alert"
+          >
+            <X className="w-4 h-4" />
+          </button>
+        </div>
       </div>
-      <div className="space-y-2">
+
+      <div className="space-y-1.5">
         {conflicts.map((conflict, index) => (
           <div
             key={index}
-            className={`p-3 rounded-xl text-xs flex items-start space-x-2 border ${
-              conflict.type === 'OVERLAP'
-                ? 'bg-rose-50 border-rose-200 text-rose-900 font-medium'
-                : 'bg-amber-100/70 border-amber-200 text-amber-950 font-medium'
-            }`}
+            className="p-2.5 rounded-xl text-xs flex items-center justify-between border bg-white/70 border-cyan-100 text-slate-800"
           >
-            {conflict.type === 'OVERLAP' ? (
-              <ShieldAlert className="w-4 h-4 text-rose-600 flex-shrink-0 mt-0.5" />
-            ) : (
-              <Clock className="w-4 h-4 text-amber-600 flex-shrink-0 mt-0.5" />
-            )}
-            <div>
-              <span className="font-bold uppercase tracking-wider text-[10px] mr-2 px-1.5 py-0.5 rounded bg-white border border-slate-200 text-slate-900 shadow-sm">
-                {conflict.type}
-              </span>
-              <span>{conflict.message}</span>
+            <div className="flex items-center space-x-2">
+              <Clock className="w-3.5 h-3.5 text-cyan-600 flex-shrink-0" />
+              <span className="font-semibold text-slate-700">{conflict.message}</span>
             </div>
+            <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-cyan-100/70 text-cyan-800 border border-cyan-200/50">
+              Auto-Managed
+            </span>
           </div>
         ))}
       </div>
     </div>
   );
 }
+
