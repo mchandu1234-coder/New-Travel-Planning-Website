@@ -15,7 +15,7 @@ export default function HomePage() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    destinationApi.getAll()
+    destinationApi.getAll({ size: 10 })
       .then((res) => {
         if (res.data.success) {
           const items = Array.isArray(res.data.data) ? res.data.data : (res.data.data?.content || []);
@@ -48,6 +48,7 @@ export default function HomePage() {
     setSimBuffer(buf);
     setSimTravelers(trav);
   };
+
   return (
     <div className="min-h-screen bg-mesh text-slate-900 pb-20">
       
@@ -88,27 +89,29 @@ export default function HomePage() {
             <div className="flex flex-wrap items-center gap-3 pt-2">
               <button
                 onClick={() => navigate(isAuthenticated ? '/trips/new' : '/trips/new')}
-                className="btn-teal px-8 py-3.5 text-sm font-bold rounded-full shadow-md shadow-teal-600/20 hover:shadow-teal-600/30 transition flex items-center space-x-2"
+                className="btn-interactive btn-action-teal px-8 py-3.5 text-sm font-black rounded-full shadow-md shadow-teal-600/25"
               >
+                <Sparkles className="w-4 h-4" />
                 <span>{isAuthenticated ? 'Plan New Trip' : 'Create Account / Plan'}</span>
               </button>
               
               <button
                 onClick={() => navigate('/destinations')}
-                className="btn-dark px-8 py-3.5 text-sm font-bold rounded-full shadow-md transition flex items-center space-x-2"
+                className="btn-interactive btn-dark px-8 py-3.5 text-sm font-black rounded-full shadow-md"
               >
-                <span>Explore Destinations</span>
+                <Compass className="w-4 h-4 text-cyan-400" />
+                <span>Explore 100+ Destinations</span>
               </button>
             </div>
 
-            {/* Stat Pills Row (Directly matching Image) */}
+            {/* Stat Pills Row */}
             <div className="pt-4 flex flex-wrap gap-3">
               <div className="bg-white/95 rounded-2xl p-3 px-5 border border-slate-200/80 shadow-sm min-w-[130px]">
                 <div className="text-[10px] uppercase font-extrabold tracking-wider text-blue-800">
                   DESTINATIONS
                 </div>
                 <div className="text-lg font-black text-blue-950 font-heading">
-                  32+ Curated
+                  100+ Curated
                 </div>
               </div>
 
@@ -138,145 +141,117 @@ export default function HomePage() {
               
               {/* Header Badge & Dynamic Score */}
               <div className="flex items-center justify-between pb-4 border-b border-slate-100">
-                <div className="flex items-center space-x-2.5">
-                  <div className="w-9 h-9 rounded-xl bg-teal-50 border border-teal-100 flex items-center justify-center p-1.5">
-                    <RetentionBarIcon size="sm" />
-                  </div>
-                  <div>
-                    <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-700 block">Live Stress-Test</span>
-                    <h3 className="text-sm font-black text-blue-950 font-heading">Journey Feasibility</h3>
-                  </div>
+                <div className="flex items-center space-x-2">
+                  <span className="w-2.5 h-2.5 rounded-full bg-teal-500 animate-pulse" />
+                  <span className="text-[11px] font-extrabold uppercase tracking-wider text-slate-800">
+                    Feasibility Engine
+                  </span>
                 </div>
+                <span className={`text-xs font-extrabold px-3 py-1 rounded-full border shadow-sm ${
+                  isSafe ? 'bg-emerald-50 text-emerald-800 border-emerald-200' :
+                  isWarning ? 'bg-amber-50 text-amber-800 border-amber-200' :
+                  'bg-rose-50 text-rose-800 border-rose-200'
+                }`}>
+                  {feasibilityScore}% Feasibility
+                </span>
+              </div>
 
-                <div className="text-right">
-                  <span className={`text-2xl font-black font-heading ${
-                    isSafe ? 'text-teal-700' : isWarning ? 'text-amber-600' : 'text-rose-600'
-                  }`}>
-                    {feasibilityScore}%
-                  </span>
-                  <span className={`text-[10px] font-extrabold block uppercase tracking-wider ${
-                    isSafe ? 'text-teal-800' : isWarning ? 'text-amber-700' : 'text-rose-700'
-                  }`}>
-                    {isSafe ? 'High Feasibility' : isWarning ? 'Moderate Risk' : 'Conflict Alert'}
-                  </span>
+              {/* Quick Preset Scenario Pills */}
+              <div className="py-4 space-y-2">
+                <span className="text-[10px] font-extrabold uppercase text-slate-500 tracking-wider">
+                  Test Travel Scenarios:
+                </span>
+                <div className="grid grid-cols-3 gap-1.5">
+                  <button
+                    type="button"
+                    onClick={() => setScenario(2, 60, 2)}
+                    className="btn-interactive py-1.5 px-2 bg-slate-50 hover:bg-teal-50 text-[11px] font-bold text-slate-800 hover:text-teal-900 rounded-xl border border-slate-200 text-center"
+                  >
+                    Relaxed
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScenario(4, 30, 3)}
+                    className="btn-interactive py-1.5 px-2 bg-slate-50 hover:bg-sky-50 text-[11px] font-bold text-slate-800 hover:text-sky-900 rounded-xl border border-slate-200 text-center"
+                  >
+                    Standard
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setScenario(6, 15, 5)}
+                    className="btn-interactive py-1.5 px-2 bg-slate-50 hover:bg-rose-50 text-[11px] font-bold text-slate-800 hover:text-rose-900 rounded-xl border border-slate-200 text-center"
+                  >
+                    Fast-Paced
+                  </button>
                 </div>
               </div>
 
-              {/* Dynamic Retention Progress Bars */}
-              <div className="py-4 space-y-3">
-                <div className="flex items-end justify-center space-x-2 h-14 bg-slate-50 rounded-2xl p-2 border border-slate-100">
-                  <div 
-                    style={{ height: `${Math.max(20, Math.min(100, feasibilityScore * 0.85))}%` }} 
-                    className={`w-3 rounded-full transition-all duration-300 ${
-                      isSafe ? 'bg-teal-500' : isWarning ? 'bg-amber-400' : 'bg-rose-400'
-                    }`} 
-                  />
-                  <div 
-                    style={{ height: `${Math.max(25, Math.min(100, feasibilityScore))}%` }} 
-                    className={`w-3 rounded-full transition-all duration-300 ${
-                      isSafe ? 'bg-teal-600' : isWarning ? 'bg-amber-500' : 'bg-rose-500'
-                    }`} 
-                  />
-                  <div 
-                    style={{ height: `${Math.max(18, Math.min(100, feasibilityScore * 0.7))}%` }} 
-                    className={`w-3 rounded-full transition-all duration-300 ${
-                      isSafe ? 'bg-cyan-500' : isWarning ? 'bg-amber-400' : 'bg-rose-400'
-                    }`} 
+              {/* Sliders */}
+              <div className="space-y-4 py-2">
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                    <span>Daily Activities</span>
+                    <span className="text-teal-700 font-black">{simActivities} stops</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="8"
+                    value={simActivities}
+                    onChange={(e) => setSimActivities(Number(e.target.value))}
+                    className="w-full accent-teal-600 cursor-pointer h-1.5"
                   />
                 </div>
 
-                {/* Scenario Quick Buttons */}
-                <div className="flex items-center justify-between gap-1.5 pt-1">
-                  <button
-                    type="button"
-                    onClick={() => setScenario(2, 60, 1)}
-                    className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-teal-50 hover:text-teal-800 rounded-xl text-[11px] font-bold text-slate-700 transition"
-                  >
-                    Chill Solo
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScenario(3, 45, 3)}
-                    className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-teal-50 hover:text-teal-800 rounded-xl text-[11px] font-bold text-slate-700 transition"
-                  >
-                    Balanced Group
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => setScenario(5, 20, 5)}
-                    className="flex-1 py-1.5 px-2 bg-slate-100 hover:bg-rose-50 hover:text-rose-800 rounded-xl text-[11px] font-bold text-slate-700 transition"
-                  >
-                    Rush Packed
-                  </button>
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                    <span>Transit Buffer</span>
+                    <span className="text-teal-700 font-black">{simBuffer} mins</span>
+                  </div>
+                  <input
+                    type="range"
+                    min="10"
+                    max="90"
+                    step="5"
+                    value={simBuffer}
+                    onChange={(e) => setSimBuffer(Number(e.target.value))}
+                    className="w-full accent-teal-600 cursor-pointer h-1.5"
+                  />
                 </div>
 
-                {/* Interactive Sliders */}
-                <div className="space-y-2.5 pt-2">
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">Daily Events:</span>
-                      <span className="text-teal-800 font-extrabold">{simActivities} activities/day</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="6"
-                      value={simActivities}
-                      onChange={(e) => setSimActivities(Number(e.target.value))}
-                      className="w-full accent-teal-600 cursor-pointer h-1.5"
-                    />
+                <div>
+                  <div className="flex justify-between text-xs font-bold text-slate-800 mb-1">
+                    <span>Group Size</span>
+                    <span className="text-teal-700 font-black">{simTravelers} travelers</span>
                   </div>
-
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">Transit Buffer:</span>
-                      <span className="text-teal-800 font-extrabold">{simBuffer} minutes</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="15"
-                      max="75"
-                      step="5"
-                      value={simBuffer}
-                      onChange={(e) => setSimBuffer(Number(e.target.value))}
-                      className="w-full accent-teal-600 cursor-pointer h-1.5"
-                    />
-                  </div>
-
-                  <div className="bg-slate-50 p-2.5 rounded-xl border border-slate-200/80">
-                    <div className="flex justify-between text-xs font-bold mb-1">
-                      <span className="text-slate-700">Group Size:</span>
-                      <span className="text-teal-800 font-extrabold">{simTravelers} {simTravelers === 1 ? 'traveler' : 'travelers'}</span>
-                    </div>
-                    <input
-                      type="range"
-                      min="1"
-                      max="6"
-                      value={simTravelers}
-                      onChange={(e) => setSimTravelers(Number(e.target.value))}
-                      className="w-full accent-teal-600 cursor-pointer h-1.5"
-                    />
-                  </div>
+                  <input
+                    type="range"
+                    min="1"
+                    max="6"
+                    value={simTravelers}
+                    onChange={(e) => setSimTravelers(Number(e.target.value))}
+                    className="w-full accent-teal-600 cursor-pointer h-1.5"
+                  />
                 </div>
+              </div>
 
-                {/* Live AI Diagnostic Signal */}
-                <div className={`p-3 rounded-2xl border text-xs font-medium ${
-                  isSafe 
-                    ? 'bg-teal-50/80 border-teal-200 text-teal-900' 
-                    : isWarning 
-                    ? 'bg-amber-50/80 border-amber-200 text-amber-950' 
-                    : 'bg-rose-50/80 border-rose-200 text-rose-950'
-                }`}>
-                  {isSafe && "✓ Safe schedule: Plentiful buffer protects against subway and check-in delays."}
-                  {isWarning && "⚠ Moderate caution: Buffer under 40m may cause tight connection during peak transit."}
-                  {isDanger && "🚨 High Collision Signal: 5+ activities with tight buffer creates elevated overlap risk."}
-                </div>
+              {/* Live AI Diagnostic Signal */}
+              <div className={`p-3 rounded-2xl border text-xs font-medium my-2 ${
+                isSafe 
+                  ? 'bg-teal-50/80 border-teal-200 text-teal-900' 
+                  : isWarning 
+                  ? 'bg-amber-50/80 border-amber-200 text-amber-950' 
+                  : 'bg-rose-50/80 border-rose-200 text-rose-950'
+              }`}>
+                {isSafe && "✓ Safe schedule: Plentiful buffer protects against subway and check-in delays."}
+                {isWarning && "⚠ Moderate caution: Buffer under 40m may cause tight connection during peak transit."}
+                {isDanger && "🚨 High Collision Signal: 5+ activities with tight buffer creates elevated overlap risk."}
               </div>
 
               {/* Direct CTA */}
               <button
                 onClick={() => navigate('/trips/new')}
-                className="w-full py-2.5 btn-teal text-xs font-bold rounded-2xl shadow-sm flex items-center justify-center space-x-2 transition"
+                className="btn-interactive btn-action-teal w-full py-3 text-xs font-black rounded-2xl shadow-md"
               >
                 <span>Plan Custom Itinerary</span>
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -287,9 +262,9 @@ export default function HomePage() {
 
         </div>
 
-        {/* 3-Card Feature Grid matching Bottom Row in Image */}
+        {/* 3-Card Feature Grid */}
         <div className="mt-12 grid grid-cols-1 md:grid-cols-3 gap-6">
-          <div className="bg-white/95 rounded-[24px] p-6 border border-slate-200/80 shadow-sm space-y-2 hover:border-teal-500/40 hover:shadow-md transition">
+          <div className="bg-white/95 rounded-[24px] p-6 border border-slate-200/80 shadow-sm space-y-2 hover:border-cyan-500/50 hover:shadow-md transition">
             <h4 className="text-base font-black text-blue-950 font-heading">
               Itinerary Scoring
             </h4>
@@ -298,7 +273,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="bg-white/95 rounded-[24px] p-6 border border-slate-200/80 shadow-sm space-y-2 hover:border-teal-500/40 hover:shadow-md transition">
+          <div className="bg-white/95 rounded-[24px] p-6 border border-slate-200/80 shadow-sm space-y-2 hover:border-rose-500/50 hover:shadow-md transition">
             <h4 className="text-base font-black text-blue-950 font-heading">
               At-Risk Conflict Detection
             </h4>
@@ -307,7 +282,7 @@ export default function HomePage() {
             </p>
           </div>
 
-          <div className="bg-white/95 rounded-[24px] p-6 border border-slate-200/80 shadow-sm space-y-2 hover:border-teal-500/40 hover:shadow-md transition">
+          <div className="bg-white/95 rounded-[24px] p-6 border border-slate-200/80 shadow-sm space-y-2 hover:border-teal-500/50 hover:shadow-md transition">
             <h4 className="text-base font-black text-blue-950 font-heading">
               Analytics Dashboard
             </h4>
@@ -322,18 +297,18 @@ export default function HomePage() {
       {/* Search & Destination Discovery Bar */}
       <section className="py-6 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <form onSubmit={handleSearch} className="max-w-3xl mx-auto">
-          <div className="bg-white p-2.5 rounded-full border border-slate-200/90 shadow-sm flex items-center space-x-3">
+          <div className="bg-white p-2.5 rounded-full border border-slate-200/90 shadow-md flex items-center space-x-3">
             <Search className="w-5 h-5 text-teal-600 ml-4 flex-shrink-0" />
             <input
               type="text"
-              placeholder="Search by city, vibe, or continent (e.g., Tokyo, Paris, Bali, Rome)..."
+              placeholder="Search across 100+ destinations by city, vibe, or continent..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-transparent text-slate-800 placeholder-slate-400 outline-none text-sm font-medium"
+              className="w-full bg-transparent text-slate-800 placeholder-slate-400 outline-none text-sm font-bold"
             />
             <button
               type="submit"
-              className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-full text-xs transition"
+              className="btn-interactive btn-action-teal px-6 py-2.5 text-xs font-bold rounded-full shadow-sm"
             >
               Search
             </button>
@@ -354,9 +329,9 @@ export default function HomePage() {
           </div>
           <Link
             to="/destinations"
-            className="mt-3 sm:mt-0 flex items-center space-x-1.5 text-xs font-bold text-teal-700 hover:text-teal-800 transition"
+            className="btn-interactive mt-3 sm:mt-0 px-4 py-2 bg-white rounded-full border border-slate-200 text-xs font-black text-teal-700 hover:text-white hover:bg-teal-600 hover:border-teal-600 shadow-sm transition"
           >
-            <span>View All 32 Destinations</span>
+            <span>View All 100+ Destinations</span>
             <ArrowRight className="w-4 h-4" />
           </Link>
         </div>
@@ -371,30 +346,30 @@ export default function HomePage() {
               <div
                 key={dest.id}
                 onClick={() => navigate(`/destinations/${dest.id}`)}
-                className="group bg-white rounded-3xl overflow-hidden border border-slate-200/80 hover:border-teal-500/50 hover:shadow-lg transition-all duration-300 cursor-pointer"
+                className="group bg-white rounded-3xl overflow-hidden border border-slate-200/90 hover:border-teal-400 hover:shadow-xl transition-all duration-300 cursor-pointer"
               >
                 <div className="relative h-56 overflow-hidden">
                   <img
                     src={displayImage}
                     alt={dest.name}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-500"
                   />
-                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/70 via-transparent to-transparent" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-slate-950/75 via-transparent to-transparent" />
                   
                   {/* Rating Badge */}
-                  <div className="absolute top-3.5 right-3.5 bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 flex items-center space-x-1 text-slate-800 text-xs font-bold shadow-sm">
+                  <div className="absolute top-3.5 right-3.5 bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 flex items-center space-x-1 text-slate-800 text-xs font-black shadow-sm">
                     <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                     <span>{dest.rating || 4.9}</span>
                   </div>
 
                   {/* Vibe Tag */}
-                  <div className="absolute top-3.5 left-3.5 bg-teal-600 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                  <div className="absolute top-3.5 left-3.5 bg-gradient-to-r from-teal-600 to-emerald-600 text-white px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-sm">
                     {vibe}
                   </div>
 
                   <div className="absolute bottom-3.5 left-4 right-4">
-                    <h3 className="text-xl font-black text-white font-heading">{dest.name}</h3>
-                    <div className="flex items-center space-x-1 text-slate-200 text-xs font-medium">
+                    <h3 className="text-xl font-black text-white font-heading tracking-tight">{dest.name}</h3>
+                    <div className="flex items-center space-x-1 text-slate-200 text-xs font-bold mt-0.5">
                       <MapPin className="w-3.5 h-3.5 text-teal-300" />
                       <span>{dest.country}</span>
                     </div>
@@ -408,10 +383,10 @@ export default function HomePage() {
 
                   <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs font-bold text-slate-800">
                     <div>
-                      <span className="text-slate-700 text-[10px] uppercase block font-extrabold">Avg. Daily Budget</span>
+                      <span className="text-slate-500 text-[10px] uppercase block font-extrabold">Avg. Daily Budget</span>
                       <span className="text-teal-700 font-black text-sm">${cost}</span> / day
                     </div>
-                    <button className="px-4 py-1.5 bg-slate-900 hover:bg-teal-600 text-white rounded-full text-xs font-bold transition">
+                    <button className="btn-interactive btn-action-teal px-4 py-1.5 text-xs font-bold rounded-full shadow-sm">
                       View Details
                     </button>
                   </div>
@@ -425,4 +400,3 @@ export default function HomePage() {
     </div>
   );
 }
-

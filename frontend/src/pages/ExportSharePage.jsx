@@ -98,22 +98,30 @@ export default function ExportSharePage() {
           doc.text(`• [${time}] ${item.title}${cost}`, 25, y);
           y += 6;
           if (item.locationName) {
+            doc.setFontSize(8);
             doc.setTextColor(120);
-            doc.text(`   Location: ${item.locationName}`, 25, y);
-            y += 6;
+            doc.text(`  Location: ${item.locationName}`, 28, y);
+            y += 5;
+            doc.setFontSize(10);
+            doc.setTextColor(40);
           }
         });
       }
       y += 4;
     });
 
-    doc.save(`trip_${id}_itinerary.pdf`);
+    doc.save(`${(trip.title || 'trip').replace(/\s+/g, '_')}_itinerary.pdf`);
   };
 
   const handleCopyLink = () => {
-    navigator.clipboard.writeText(window.location.origin + `/trips/${id}`);
+    const currentUrl = window.location.origin + `/trips/${id}`;
+    navigator.clipboard.writeText(currentUrl);
     setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
+    setTimeout(() => setCopied(false), 2500);
+  };
+
+  const handlePrint = () => {
+    window.print();
   };
 
   if (loading || !exportData) {
@@ -124,13 +132,16 @@ export default function ExportSharePage() {
     );
   }
 
+  const trip = exportData.trip || exportData;
+  const days = trip.days || exportData.days || [];
+
   return (
     <div className="min-h-screen bg-[#f7faf9] bg-mesh text-slate-900 py-10 pb-20">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 space-y-8">
         
         {/* Header */}
         <div>
-          <Link to={`/trips/${id}`} className="text-xs font-bold text-cyan-700 hover:underline flex items-center space-x-1 mb-2">
+          <Link to={`/trips/${id}`} className="btn-interactive text-xs font-bold text-cyan-700 hover:text-cyan-900 flex items-center space-x-1 mb-2">
             <ArrowLeft className="w-3.5 h-3.5" />
             <span>Back to Trip Command Center</span>
           </Link>
@@ -143,21 +154,21 @@ export default function ExportSharePage() {
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
           
           {/* iCal Download */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 flex flex-col justify-between shadow-sm">
+          <div className="dashboard-box dashboard-box-cyan space-y-4">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-cyan-50 border border-cyan-200 flex items-center justify-center text-cyan-700">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-cyan-500 to-sky-400 text-white flex items-center justify-center shadow-md shadow-cyan-500/25">
                 <CalendarIcon className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">iCalendar (.ics)</h3>
-                <p className="text-xs text-slate-600 font-medium mt-1">
+                <h3 className="text-base font-black text-slate-900 font-heading">iCalendar (.ics)</h3>
+                <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
                   Sync all flight slots and activities into Apple, Google, or Outlook Calendar.
                 </p>
               </div>
             </div>
             <button
               onClick={handleDownloadICal}
-              className="w-full py-3 bg-gradient-to-r from-cyan-500 to-sky-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-cyan-500/20 hover:opacity-95 transition flex items-center justify-center space-x-2"
+              className="btn-interactive btn-action-cyan w-full py-3 text-white font-black rounded-xl text-xs shadow-md flex items-center justify-center space-x-2"
             >
               <Download className="w-4 h-4" />
               <span>Download .ics</span>
@@ -165,21 +176,21 @@ export default function ExportSharePage() {
           </div>
 
           {/* Direct PDF Download */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 flex flex-col justify-between shadow-sm">
+          <div className="dashboard-box dashboard-box-amber space-y-4">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-amber-50 border border-amber-200 flex items-center justify-center text-amber-700">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-amber-500 to-orange-500 text-white flex items-center justify-center shadow-md shadow-amber-500/25">
                 <FileText className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">Download PDF</h3>
-                <p className="text-xs text-slate-600 font-medium mt-1">
+                <h3 className="text-base font-black text-slate-900 font-heading">Download PDF</h3>
+                <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
                   Export formatted standalone PDF document for offline travel itineraries.
                 </p>
               </div>
             </div>
             <button
               onClick={handleDownloadPDF}
-              className="w-full py-3 bg-gradient-to-r from-amber-400 to-amber-500 text-slate-950 font-black rounded-xl text-xs shadow-lg shadow-amber-500/20 hover:opacity-95 transition flex items-center justify-center space-x-2"
+              className="btn-interactive btn-action-amber w-full py-3 text-white font-black rounded-xl text-xs shadow-md flex items-center justify-center space-x-2"
             >
               <Download className="w-4 h-4" />
               <span>Download .pdf</span>
@@ -187,14 +198,14 @@ export default function ExportSharePage() {
           </div>
 
           {/* Share & QR Code */}
-          <div className="glass-panel p-6 rounded-3xl border border-slate-200 space-y-4 flex flex-col justify-between shadow-sm">
+          <div className="dashboard-box dashboard-box-indigo space-y-4">
             <div className="space-y-4">
-              <div className="w-12 h-12 rounded-2xl bg-purple-50 border border-purple-200 flex items-center justify-center text-purple-700">
+              <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-indigo-500 to-purple-600 text-white flex items-center justify-center shadow-md shadow-indigo-500/25">
                 <Share2 className="w-6 h-6" />
               </div>
               <div>
-                <h3 className="text-base font-bold text-slate-900 font-heading">QR Code & Link</h3>
-                <p className="text-xs text-slate-600 font-medium mt-1">
+                <h3 className="text-base font-black text-slate-900 font-heading">QR Code & Link</h3>
+                <p className="text-xs text-slate-600 font-medium mt-1 leading-relaxed">
                   Scan the QR code or copy shareable link for travel companions.
                 </p>
               </div>
@@ -206,9 +217,9 @@ export default function ExportSharePage() {
             </div>
             <button
               onClick={handleCopyLink}
-              className="w-full py-3 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow-sm"
+              className="btn-interactive w-full py-3 bg-indigo-50 border border-indigo-200 hover:bg-indigo-500 hover:text-white hover:border-transparent text-indigo-800 font-black rounded-xl text-xs transition flex items-center justify-center space-x-2 shadow-sm"
             >
-              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-cyan-700" />}
+              {copied ? <Check className="w-4 h-4 text-emerald-600" /> : <Copy className="w-4 h-4 text-indigo-700" />}
               <span>{copied ? 'Link Copied!' : 'Copy Link'}</span>
             </button>
           </div>
@@ -219,64 +230,43 @@ export default function ExportSharePage() {
         <div className="glass-panel p-8 rounded-3xl border border-slate-200 space-y-6 shadow-sm">
           <div className="flex justify-between items-center pb-4 border-b border-slate-100">
             <div>
-              <span className="text-xs font-bold text-amber-800 uppercase tracking-widest">Document Preview</span>
-              <h3 className="text-xl font-black text-blue-950 font-heading">Printable Itinerary Plan</h3>
+              <span className="text-[10px] font-extrabold uppercase tracking-wider text-slate-500 block">Print Preview</span>
+              <h2 className="text-2xl font-black text-blue-950 font-heading">{trip.title}</h2>
             </div>
-            <div className="flex items-center space-x-3">
-              <button
-                onClick={handleDownloadPDF}
-                className="px-4 py-2 bg-amber-50 border border-amber-200 hover:bg-amber-100 text-amber-900 font-bold rounded-xl text-xs flex items-center space-x-2 transition shadow-sm"
-              >
-                <Download className="w-4 h-4" />
-                <span>Save PDF</span>
-              </button>
-              <button
-                onClick={() => window.print()}
-                className="px-4 py-2 bg-slate-100 border border-slate-200 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs flex items-center space-x-2 transition shadow-sm"
-              >
-                <Printer className="w-4 h-4 text-cyan-700" />
-                <span>Print</span>
-              </button>
-            </div>
+            <button
+              onClick={handlePrint}
+              className="btn-interactive px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-xl text-xs font-bold transition flex items-center space-x-1.5 shadow-sm"
+            >
+              <Printer className="w-4 h-4 text-slate-700" />
+              <span>Print Plan</span>
+            </button>
           </div>
 
-          {/* Render Itinerary Content */}
-          {(() => {
-            const trip = exportData.trip || exportData;
-            const days = trip.days || exportData.days || [];
-            return (
-              <div className="bg-white p-6 rounded-2xl border border-slate-200 space-y-6 text-xs shadow-sm">
-                <div className="text-center space-y-1 pb-4 border-b border-slate-100">
-                  <h2 className="text-2xl font-black text-slate-900 font-heading">{trip.title || trip.tripTitle || 'Trip Itinerary'}</h2>
-                  <p className="text-cyan-800 font-bold">{trip.destinationName || trip.destination?.name || 'Destination'}</p>
-                  <p className="text-slate-600 font-medium">{trip.startDate} — {trip.endDate}</p>
-                </div>
-
-                {days.map((day, idx) => (
-                  <div key={idx} className="space-y-3">
-                    <h4 className="text-sm font-bold text-slate-900 font-heading">
-                      Day {day.dayNumber} ({day.date}) {day.title ? `- ${day.title}` : ''}
-                    </h4>
-                    <div className="space-y-2 pl-3 border-l-2 border-slate-200">
-                      {(day.items || []).map((item, itemIdx) => (
-                        <div key={itemIdx} className="p-3 bg-slate-50 rounded-xl border border-slate-200 flex justify-between">
-                          <div>
-                            <span className="font-bold text-cyan-800 mr-2">{item.startTime || item.time || 'All Day'}</span>
-                            <span className="text-slate-900 font-bold">{item.title}</span>
-                            {item.locationName && <span className="text-slate-600 text-[10px] ml-2 font-medium">📍 {item.locationName}</span>}
-                          </div>
-                          <span className="text-emerald-800 font-black">${item.estimatedCost ?? item.cost ?? 0}</span>
-                        </div>
-                      ))}
-                      {(!day.items || day.items.length === 0) && (
-                        <p className="text-slate-600 italic text-[11px]">No activities scheduled for this day.</p>
-                      )}
-                    </div>
-                  </div>
-                ))}
+          <div className="space-y-6 text-xs text-slate-800">
+            {days.map((day) => (
+              <div key={day.id} className="p-4 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-2">
+                <h4 className="font-black text-slate-900 font-heading text-sm">
+                  Day {day.dayNumber}: {day.title || day.date}
+                </h4>
+                {(day.items || []).length === 0 ? (
+                  <p className="text-slate-500 italic">No scheduled activities recorded.</p>
+                ) : (
+                  <ul className="space-y-1.5 pl-2">
+                    {(day.items || []).map((item) => (
+                      <li key={item.id} className="flex items-center space-x-2">
+                        <span className="w-1.5 h-1.5 rounded-full bg-cyan-600" />
+                        <span className="font-bold text-slate-700">[{item.startTime || 'All Day'}]</span>
+                        <span className="text-slate-900 font-semibold">{item.title}</span>
+                        {item.estimatedCost > 0 && (
+                          <span className="text-emerald-700 font-bold">(${item.estimatedCost})</span>
+                        )}
+                      </li>
+                    ))}
+                  </ul>
+                )}
               </div>
-            );
-          })()}
+            ))}
+          </div>
         </div>
 
       </div>

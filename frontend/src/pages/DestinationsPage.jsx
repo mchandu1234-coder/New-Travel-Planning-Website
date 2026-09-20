@@ -8,7 +8,7 @@ import {
 import { RetentionBarIcon } from '../components/BrandLogo';
 
 const CONTINENTS = ['All', 'Saved', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
-const VIBES = ['All', 'Cultural', 'Tropical', 'Urban', 'Mountain', 'Historical', 'Romance', 'Adventure', 'Modern'];
+const VIBES = ['All', 'Cultural', 'Tropical', 'Urban', 'Mountain', 'Historical', 'Romance', 'Adventure', 'Modern', 'Beach', 'Nature'];
 
 export default function DestinationsPage() {
   const [searchParams] = useSearchParams();
@@ -53,7 +53,7 @@ export default function DestinationsPage() {
 
   const fetchDestinations = () => {
     setLoading(true);
-    const params = { size: 100 };
+    const params = { size: 200 };
     if (selectedContinent !== 'All' && selectedContinent !== 'Saved') {
       params.continent = selectedContinent;
     }
@@ -109,20 +109,20 @@ export default function DestinationsPage() {
         
         {/* Header */}
         <div className="text-center max-w-2xl mx-auto mb-10 space-y-3">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-blue-50 border border-blue-200 text-blue-800 text-xs font-bold">
-            <Compass className="w-3.5 h-3.5" />
-            <span>GLOBAL DESTINATIONS CATALOG</span>
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 text-blue-900 text-xs font-black shadow-sm">
+            <Compass className="w-3.5 h-3.5 text-cyan-600 animate-spin" style={{ animationDuration: '8s' }} />
+            <span>100+ WORLD FAMOUS DESTINATIONS</span>
           </div>
-          <h1 className="text-3xl sm:text-5xl font-black text-blue-950 font-heading">
+          <h1 className="text-3xl sm:text-5xl font-black text-blue-950 font-heading tracking-tight">
             Discover Your Next Escapade
           </h1>
           <p className="text-sm text-slate-700 font-medium">
-            Filter through world-famous cities, tropical islands, and cultural gems.
+            Explore 100+ iconic cities, tropical sanctuaries, alpine wonders, and cultural capitals across all continents.
           </p>
         </div>
 
         {/* Filter Controls Bar */}
-        <div className="bg-white p-6 rounded-3xl border border-slate-200/80 shadow-sm mb-10 space-y-6">
+        <div className="glass-panel p-6 rounded-3xl border border-slate-200/90 shadow-sm mb-10 space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             
             {/* Search Input */}
@@ -130,18 +130,18 @@ export default function DestinationsPage() {
               <Search className="w-4 h-4 text-slate-600 absolute left-3.5 top-1/2 -translate-y-1/2" />
               <input
                 type="text"
-                placeholder="Search city, country, or keyword..."
+                placeholder="Search city, country, monument, or keyword..."
                 value={search}
                 onChange={(e) => setSearch(e.target.value)}
-                className="w-full glass-input pl-10 text-xs text-slate-900 placeholder:text-slate-500 font-medium"
+                className="w-full glass-input pl-10 text-xs sm:text-sm text-slate-900 placeholder:text-slate-500 font-bold"
               />
             </div>
 
             {/* Price Slider */}
-            <div className="bg-slate-50 p-3 rounded-2xl border border-slate-200">
-              <div className="flex justify-between items-center text-xs font-bold mb-1">
+            <div className="bg-slate-50/90 p-3.5 rounded-2xl border border-slate-200/90 shadow-inner">
+              <div className="flex justify-between items-center text-xs font-bold mb-1.5">
                 <span className="text-slate-700 font-bold">Max Daily Budget</span>
-                <span className="text-teal-700 font-black">${maxBudget} / day</span>
+                <span className="text-teal-700 font-black px-2 py-0.5 bg-teal-50 rounded-lg border border-teal-200">${maxBudget} / day</span>
               </div>
               <input
                 type="range"
@@ -158,16 +158,18 @@ export default function DestinationsPage() {
 
           {/* Continent Pills */}
           <div>
-            <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Continent</label>
+            <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-2.5">
+              Filter by Continent
+            </label>
             <div className="flex flex-wrap gap-2">
               {CONTINENTS.map((c) => (
                 <button
                   key={c}
                   onClick={() => setSelectedContinent(c)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition ${
+                  className={`btn-interactive px-4 py-2 rounded-full text-xs font-black transition-all ${
                     selectedContinent === c
-                      ? 'bg-slate-900 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
+                      ? 'btn-action-cyan shadow-md shadow-cyan-500/25'
+                      : 'bg-white text-slate-700 hover:text-cyan-800 hover:bg-cyan-50 hover:border-cyan-200 border border-slate-200'
                   }`}
                 >
                   {c}
@@ -178,16 +180,18 @@ export default function DestinationsPage() {
 
           {/* Vibe Pills */}
           <div>
-            <label className="block text-[11px] font-extrabold text-slate-700 uppercase tracking-wider mb-2">Vibe & Atmosphere</label>
+            <label className="block text-[11px] font-black text-slate-700 uppercase tracking-wider mb-2.5">
+              Filter by Travel Vibe & Atmosphere
+            </label>
             <div className="flex flex-wrap gap-2">
               {VIBES.map((v) => (
                 <button
                   key={v}
                   onClick={() => setSelectedVibe(v)}
-                  className={`px-3.5 py-1.5 rounded-full text-xs font-bold transition ${
+                  className={`btn-interactive px-3.5 py-1.5 rounded-full text-xs font-extrabold transition-all ${
                     selectedVibe === v
-                      ? 'bg-teal-600 text-white shadow-sm'
-                      : 'bg-slate-100 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
+                      ? 'btn-action-emerald shadow-md shadow-emerald-500/25'
+                      : 'bg-white text-slate-700 hover:text-emerald-800 hover:bg-emerald-50 hover:border-emerald-200 border border-slate-200'
                   }`}
                 >
                   {v}
@@ -201,11 +205,11 @@ export default function DestinationsPage() {
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-2">
           <div className="flex items-center space-x-2">
             <p className="text-xs font-extrabold text-slate-800">
-              Showing <span className="text-teal-700 font-black">{filteredDestinations.length}</span> destinations
+              Showing <span className="text-teal-700 font-black px-1.5 py-0.5 bg-teal-50 rounded-md border border-teal-200">{filteredDestinations.length}</span> destinations
             </p>
             {favorites.length > 0 && (
-              <span className="inline-flex items-center space-x-1 px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 text-[10px] font-bold border border-rose-200">
-                <Heart className="w-3 h-3 fill-rose-500 text-rose-500" />
+              <span className="inline-flex items-center space-x-1 px-2.5 py-1 rounded-full bg-rose-50 text-rose-700 text-[11px] font-extrabold border border-rose-200 shadow-sm">
+                <Heart className="w-3.5 h-3.5 fill-rose-500 text-rose-500" />
                 <span>{favorites.length} Saved</span>
               </span>
             )}
@@ -213,7 +217,7 @@ export default function DestinationsPage() {
 
           <div className="flex items-center space-x-3">
             {/* Sort By Dropdown */}
-            <div className="flex items-center space-x-2 bg-white px-3 py-1.5 rounded-xl border border-slate-200 shadow-sm text-xs">
+            <div className="flex items-center space-x-2 bg-white px-3.5 py-2 rounded-xl border border-slate-200 shadow-sm text-xs">
               <ArrowUpDown className="w-3.5 h-3.5 text-slate-500" />
               <span className="text-slate-600 font-bold hidden sm:inline">Sort:</span>
               <select
@@ -238,7 +242,7 @@ export default function DestinationsPage() {
                   viewMode === 'grid' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <LayoutGrid className="w-3.5 h-3.5" />
+                <LayoutGrid className="w-4 h-4" />
               </button>
               <button
                 onClick={() => setViewMode('table')}
@@ -247,7 +251,7 @@ export default function DestinationsPage() {
                   viewMode === 'table' ? 'bg-slate-900 text-white shadow-sm' : 'text-slate-600 hover:text-slate-900'
                 }`}
               >
-                <List className="w-3.5 h-3.5" />
+                <List className="w-4 h-4" />
               </button>
             </div>
           </div>
@@ -255,18 +259,19 @@ export default function DestinationsPage() {
 
         {/* Grid or Table Results */}
         {loading ? (
-          <div className="flex justify-center items-center py-20">
-            <div className="w-10 h-10 border-4 border-teal-600 border-t-transparent rounded-full animate-spin" />
+          <div className="flex flex-col justify-center items-center py-24 space-y-4">
+            <div className="w-12 h-12 border-4 border-cyan-500 border-t-transparent rounded-full animate-spin" />
+            <p className="text-xs font-bold text-slate-600">Loading world destinations catalog...</p>
           </div>
         ) : filteredDestinations.length === 0 ? (
-          <div className="text-center py-16 bg-white rounded-3xl border border-slate-200">
-            <Compass className="w-12 h-12 text-slate-500 mx-auto mb-3" />
-            <h3 className="text-lg font-black text-slate-900">No destinations found</h3>
-            <p className="text-xs text-slate-600 font-medium mt-1">Try relaxing your search terms or filters.</p>
+          <div className="text-center py-20 bg-white rounded-3xl border border-slate-200 shadow-sm">
+            <Compass className="w-14 h-14 text-slate-400 mx-auto mb-3 animate-bounce" />
+            <h3 className="text-xl font-black text-slate-900 font-heading">No destinations found</h3>
+            <p className="text-xs text-slate-600 font-medium mt-1">Try relaxing your search query or price slider.</p>
             {selectedContinent === 'Saved' && (
               <button
                 onClick={() => setSelectedContinent('All')}
-                className="mt-3 text-xs font-bold text-teal-700 hover:underline"
+                className="mt-4 btn-interactive btn-action-teal px-5 py-2 text-xs font-bold rounded-xl"
               >
                 View all destinations
               </button>
@@ -284,19 +289,19 @@ export default function DestinationsPage() {
                 <div
                   key={dest.id}
                   onClick={() => navigate(`/destinations/${dest.id}`)}
-                  className="group bg-white rounded-3xl overflow-hidden border border-slate-200/80 hover:border-teal-500/50 hover:shadow-xl transition-all duration-300 cursor-pointer relative flex flex-col justify-between"
+                  className="group bg-white rounded-3xl overflow-hidden border border-slate-200/90 hover:border-cyan-400 hover:shadow-2xl transition-all duration-300 cursor-pointer relative flex flex-col justify-between"
                 >
                   <div className="relative h-56 overflow-hidden">
                     <img
                       src={displayImage}
                       alt={dest.name}
-                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      className="w-full h-full object-cover group-hover:scale-108 transition-transform duration-700"
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/80 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-950/20 to-transparent" />
                     
                     {/* Top Action Row: Vibe, Rating, Favorite, Quick Peek */}
                     <div className="absolute top-3.5 left-3.5 right-3.5 flex items-center justify-between">
-                      <div className="bg-teal-600 text-white px-3 py-1 rounded-full text-[11px] font-bold uppercase tracking-wider shadow-sm">
+                      <div className="bg-gradient-to-r from-teal-600 to-emerald-600 text-white px-3 py-1 rounded-full text-[11px] font-black uppercase tracking-wider shadow-md">
                         {vibe}
                       </div>
 
@@ -309,7 +314,7 @@ export default function DestinationsPage() {
                             setQuickPeekDest(dest);
                           }}
                           title="Quick Peek"
-                          className="bg-white/90 hover:bg-white text-slate-800 p-1.5 rounded-full shadow-sm backdrop-blur-md transition hover:scale-110"
+                          className="btn-interactive bg-white/95 hover:bg-white text-slate-800 p-2 rounded-full shadow-md backdrop-blur-md transition hover:scale-110"
                         >
                           <Eye className="w-3.5 h-3.5 text-teal-700" />
                         </button>
@@ -319,15 +324,15 @@ export default function DestinationsPage() {
                           type="button"
                           onClick={(e) => toggleFavorite(e, dest.id)}
                           title={isFav ? 'Remove from Saved' : 'Save Destination'}
-                          className={`p-1.5 rounded-full shadow-sm backdrop-blur-md transition hover:scale-110 ${
-                            isFav ? 'bg-rose-500 text-white' : 'bg-white/90 hover:bg-white text-slate-700'
+                          className={`btn-interactive p-2 rounded-full shadow-md backdrop-blur-md transition hover:scale-110 ${
+                            isFav ? 'bg-rose-500 text-white' : 'bg-white/95 hover:bg-white text-slate-700'
                           }`}
                         >
                           <Heart className={`w-3.5 h-3.5 ${isFav ? 'fill-white text-white' : 'text-slate-700'}`} />
                         </button>
 
                         {/* Rating */}
-                        <div className="bg-white/90 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 flex items-center space-x-1 text-slate-800 text-xs font-bold shadow-sm">
+                        <div className="bg-white/95 backdrop-blur-md px-2.5 py-1 rounded-full border border-white/50 flex items-center space-x-1 text-slate-800 text-xs font-black shadow-sm">
                           <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                           <span>{dest.rating || 4.8}</span>
                         </div>
@@ -335,28 +340,43 @@ export default function DestinationsPage() {
                     </div>
 
                     <div className="absolute bottom-3.5 left-4 right-4">
-                      <h3 className="text-xl font-black text-white font-heading">{dest.name}</h3>
-                      <div className="flex items-center space-x-1 text-slate-200 text-xs font-medium">
+                      <h3 className="text-xl font-black text-white font-heading tracking-tight">{dest.name}</h3>
+                      <div className="flex items-center space-x-1 text-slate-200 text-xs font-bold mt-0.5">
                         <MapPin className="w-3.5 h-3.5 text-teal-300" />
-                        <span>{dest.country}</span>
+                        <span>{dest.city ? `${dest.city}, ` : ''}{dest.country}</span>
                       </div>
                     </div>
                   </div>
 
-                  <div className="p-5 space-y-3 flex-1 flex flex-col justify-between">
+                  <div className="p-5 space-y-4 flex-1 flex flex-col justify-between">
                     <p className="text-xs text-slate-700 line-clamp-2 leading-relaxed font-medium">
                       {dest.description}
                     </p>
 
-                    <div className="flex items-center justify-between pt-3 border-t border-slate-100 text-xs font-bold text-slate-800">
-                      <div>
-                        <span className="text-slate-700 text-[10px] uppercase block font-extrabold">Best Season</span>
-                        <span className="text-slate-900 font-extrabold">{dest.bestTimeToVisit || dest.bestSeason || 'Spring & Fall'}</span>
+                    <div className="space-y-3 pt-2 border-t border-slate-100">
+                      <div className="flex items-center justify-between text-xs font-bold text-slate-800">
+                        <div>
+                          <span className="text-slate-500 text-[10px] uppercase block font-extrabold">Best Season</span>
+                          <span className="text-slate-900 font-extrabold">{dest.bestTimeToVisit || dest.bestSeason || 'Spring & Fall'}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="text-slate-500 text-[10px] uppercase block font-extrabold">Est. Daily</span>
+                          <span className="text-teal-700 font-black text-sm">${cost}</span>
+                        </div>
                       </div>
-                      <div className="text-right">
-                        <span className="text-slate-700 text-[10px] uppercase block font-extrabold">Est. Daily</span>
-                        <span className="text-teal-700 font-black text-sm">${cost}</span>
-                      </div>
+
+                      {/* Interactive Action Button */}
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigate(`/destinations/${dest.id}`);
+                        }}
+                        className="btn-interactive w-full py-2.5 px-4 rounded-xl text-xs font-black bg-cyan-50 text-cyan-800 border border-cyan-200/90 group-hover:bg-gradient-to-r group-hover:from-cyan-500 group-hover:to-sky-500 group-hover:text-white group-hover:border-transparent group-hover:shadow-md transition-all duration-200 flex items-center justify-center gap-1.5"
+                      >
+                        <span>Explore & Plan</span>
+                        <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                      </button>
                     </div>
                   </div>
                 </div>
@@ -365,7 +385,7 @@ export default function DestinationsPage() {
           </div>
         ) : (
           /* Table / List View */
-          <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm overflow-hidden">
+          <div className="bg-white rounded-3xl border border-slate-200/90 shadow-sm overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-left text-xs">
                 <thead>
@@ -386,33 +406,33 @@ export default function DestinationsPage() {
                       <tr 
                         key={dest.id}
                         onClick={() => navigate(`/destinations/${dest.id}`)}
-                        className="hover:bg-teal-50/50 cursor-pointer transition"
+                        className="hover:bg-cyan-50/50 cursor-pointer transition"
                       >
-                        <td className="py-3 px-4">
+                        <td className="py-3.5 px-4">
                           <div className="flex items-center space-x-3">
                             <img
                               src={dest.heroImageUrl || dest.imageUrl || 'https://images.unsplash.com/photo-1503899036084-c55cdd92da26?auto=format&fit=crop&w=120&q=80'}
                               alt={dest.name}
-                              className="w-10 h-10 rounded-xl object-cover"
+                              className="w-11 h-11 rounded-xl object-cover"
                             />
                             <div>
-                              <div className="font-bold text-slate-900">{dest.name}</div>
-                              <div className="text-[11px] text-slate-600">{dest.country}</div>
+                              <div className="font-extrabold text-slate-900">{dest.name}</div>
+                              <div className="text-[11px] text-slate-600 font-semibold">{dest.country}</div>
                             </div>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-700">{dest.continent}</td>
-                        <td className="py-3 px-4">
-                          <div className="flex items-center space-x-1 font-bold text-slate-900">
+                        <td className="py-3.5 px-4 text-slate-700 font-bold">{dest.continent}</td>
+                        <td className="py-3.5 px-4">
+                          <div className="flex items-center space-x-1 font-extrabold text-slate-900">
                             <Star className="w-3.5 h-3.5 fill-amber-400 text-amber-400" />
                             <span>{dest.rating || 4.8}</span>
                           </div>
                         </td>
-                        <td className="py-3 px-4 text-slate-700 font-semibold">{dest.bestTimeToVisit || 'Spring & Fall'}</td>
-                        <td className="py-3 px-4">
-                          <span className="font-black text-teal-700">${cost}</span> / day
+                        <td className="py-3.5 px-4 text-slate-700 font-semibold">{dest.bestTimeToVisit || 'Spring & Fall'}</td>
+                        <td className="py-3.5 px-4">
+                          <span className="font-black text-teal-700 text-sm">${cost}</span> / day
                         </td>
-                        <td className="py-3 px-4 text-right">
+                        <td className="py-3.5 px-4 text-right">
                           <div className="flex items-center justify-end space-x-2">
                             <button
                               type="button"
@@ -420,7 +440,7 @@ export default function DestinationsPage() {
                                 e.stopPropagation();
                                 setQuickPeekDest(dest);
                               }}
-                              className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-600 transition"
+                              className="btn-interactive p-2 rounded-lg hover:bg-slate-100 text-slate-600 transition"
                               title="Quick Peek"
                             >
                               <Eye className="w-4 h-4 text-teal-700" />
@@ -428,7 +448,7 @@ export default function DestinationsPage() {
                             <button
                               type="button"
                               onClick={(e) => toggleFavorite(e, dest.id)}
-                              className={`p-1.5 rounded-lg transition ${
+                              className={`btn-interactive p-2 rounded-lg transition ${
                                 isFav ? 'bg-rose-50 text-rose-600' : 'hover:bg-slate-100 text-slate-500'
                               }`}
                               title="Favorite"
@@ -441,7 +461,7 @@ export default function DestinationsPage() {
                                 e.stopPropagation();
                                 navigate(`/trips/new?destinationId=${dest.id}`);
                               }}
-                              className="px-3 py-1 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-bold transition"
+                              className="btn-interactive btn-action-teal px-3.5 py-1.5 text-xs font-bold rounded-xl shadow-sm"
                             >
                               Plan Trip
                             </button>
@@ -519,7 +539,7 @@ export default function DestinationsPage() {
                     setQuickPeekDest(null);
                     navigate(`/trips/new?destinationId=${dest.id}`);
                   }}
-                  className="flex-1 py-3 btn-teal text-xs font-bold rounded-2xl shadow-sm flex items-center justify-center space-x-2"
+                  className="btn-interactive btn-action-teal flex-1 py-3 text-xs font-bold rounded-2xl shadow-sm"
                 >
                   <Sparkles className="w-4 h-4" />
                   <span>Plan Trip Here</span>
@@ -530,7 +550,7 @@ export default function DestinationsPage() {
                     setQuickPeekDest(null);
                     navigate(`/destinations/${dest.id}`);
                   }}
-                  className="flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold rounded-2xl transition flex items-center justify-center space-x-2"
+                  className="btn-interactive flex-1 py-3 bg-slate-100 hover:bg-slate-200 text-slate-900 text-xs font-bold rounded-2xl transition"
                 >
                   <span>Full Analytics</span>
                   <ArrowRight className="w-4 h-4" />
@@ -543,4 +563,3 @@ export default function DestinationsPage() {
     </div>
   );
 }
-

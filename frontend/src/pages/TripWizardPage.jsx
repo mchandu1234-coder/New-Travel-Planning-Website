@@ -33,7 +33,7 @@ export default function TripWizardPage() {
   const CONTINENT_OPTIONS = ['All', 'Europe', 'Asia', 'North America', 'South America', 'Africa', 'Oceania'];
 
   useEffect(() => {
-    destinationApi.getAll({ size: 100 })
+    destinationApi.getAll({ size: 200 })
       .then((res) => {
         if (res.data.success) {
           const list = Array.isArray(res.data.data) ? res.data.data : (res.data.data?.content || []);
@@ -103,77 +103,79 @@ export default function TripWizardPage() {
       });
 
       if (res.data.success) {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-        const createdTrip = res.data.data;
-        navigate(`/trips/${createdTrip.id}`);
+        const newTrip = res.data.data;
+        confetti({ particleCount: 150, spread: 90, origin: { y: 0.6 } });
+        navigate(`/trips/${newTrip.id}`);
       }
     } catch (err) {
-      setError(err.response?.data?.message || err.message || 'Failed to create trip');
+      console.error(err);
+      setError(err.response?.data?.message || err.message || 'Failed to initialize trip');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#f7faf9] bg-mesh text-slate-900 py-12">
+    <div className="min-h-screen bg-mesh text-slate-900 py-10 pb-20">
       <div className="max-w-3xl mx-auto px-4 sm:px-6">
         
-        {/* Header */}
+        {/* Header Title */}
         <div className="text-center mb-8 space-y-2">
-          <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-bold">
-            <Sparkles className="w-3.5 h-3.5" />
-            <span>Multi-Step Trip Creator</span>
+          <div className="inline-flex items-center space-x-2 px-3.5 py-1.5 rounded-full bg-teal-50 border border-teal-200 text-teal-800 text-xs font-black shadow-sm">
+            <Sparkles className="w-3.5 h-3.5 text-teal-600 animate-pulse" />
+            <span>AI-POWERED TRIP CREATOR</span>
           </div>
-          <h1 className="text-3xl font-black text-blue-950 font-heading">
-            Design Your Custom Itinerary
+          <h1 className="text-3xl sm:text-4xl font-black text-blue-950 font-heading tracking-tight">
+            Plan Your Next Dream Journey
           </h1>
+          <p className="text-xs sm:text-sm text-slate-600 font-medium">
+            Configure destination logistics, budgets, and traveler count in seconds.
+          </p>
         </div>
 
-        {/* Progress Bar */}
-        <div className="mb-8 flex items-center justify-between relative px-2">
-          <div className="absolute top-1/2 left-0 right-0 h-1 bg-slate-200 -translate-y-1/2 -z-0" />
+        {/* Step Progress Bar */}
+        <div className="flex items-center justify-between mb-8 max-w-lg mx-auto">
           {[1, 2, 3, 4].map((s) => (
-            <div
-              key={s}
-              className={`w-10 h-10 rounded-2xl flex items-center justify-center font-black text-sm z-10 transition-all ${
-                s <= step
-                  ? 'bg-gradient-to-tr from-cyan-500 to-indigo-500 text-slate-950 shadow-lg shadow-cyan-500/30'
-                  : 'bg-white border border-slate-300 text-slate-600'
-              }`}
-            >
-              {s < step ? <Check className="w-5 h-5 text-slate-950" /> : s}
+            <div key={s} className="flex items-center space-x-2">
+              <div
+                className={`w-9 h-9 rounded-2xl flex items-center justify-center text-xs font-black transition-all ${
+                  step >= s
+                    ? 'bg-gradient-to-r from-teal-600 to-emerald-600 text-white shadow-md shadow-teal-500/25'
+                    : 'bg-white border border-slate-200 text-slate-400'
+                }`}
+              >
+                {step > s ? <Check className="w-4 h-4 stroke-[3]" /> : s}
+              </div>
+              {s < 4 && (
+                <div className={`w-8 sm:w-16 h-1 rounded-full ${step > s ? 'bg-teal-500' : 'bg-slate-200'}`} />
+              )}
             </div>
           ))}
         </div>
 
-        {/* Error Notification */}
-        {error && (
-          <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-800 text-xs font-bold flex items-center space-x-2">
-            <AlertCircle className="w-4 h-4 flex-shrink-0" />
-            <span>{error}</span>
-          </div>
-        )}
-
-        {/* Card Content */}
-        <div className="glass-panel p-8 rounded-3xl border border-slate-200/80 shadow-sm relative">
+        {/* Card Box Container */}
+        <div className="glass-panel p-6 sm:p-8 rounded-3xl border border-slate-200/90 shadow-xl relative">
           
-          {/* Step 1: Destination & Title */}
+          {error && (
+            <div className="mb-6 p-4 bg-rose-50 border border-rose-200 rounded-2xl text-rose-700 text-xs font-bold flex items-center space-x-2 animate-in fade-in duration-200">
+              <AlertCircle className="w-4 h-4 text-rose-600 flex-shrink-0" />
+              <span>{error}</span>
+            </div>
+          )}
+
+          {/* Step 1: Destination & Trip Name */}
           {step === 1 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h3 className="text-xl font-bold text-blue-950 font-heading">1. Select Destination & Trip Title</h3>
-
+              <h3 className="text-xl font-black text-blue-950 font-heading">1. Where are you traveling?</h3>
+              
               <div>
                 <label className="block text-xs font-extrabold text-slate-800 mb-2">Trip Title</label>
                 <input
                   type="text"
-                  placeholder="e.g. Summer Escape to Paris & Riviera"
+                  placeholder="e.g. Kyoto Cherry Blossom Tour, Paris Romance 2026..."
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
-                  className="w-full glass-input text-sm text-slate-900"
+                  className="w-full glass-input text-xs sm:text-sm font-bold text-slate-900"
                 />
               </div>
 
@@ -210,9 +212,9 @@ export default function TripWizardPage() {
                       key={c}
                       type="button"
                       onClick={() => setDestContinent(c)}
-                      className={`px-2.5 py-1 rounded-lg text-[11px] font-bold transition ${
+                      className={`btn-interactive px-3 py-1 rounded-lg text-[11px] font-bold transition ${
                         destContinent === c
-                          ? 'bg-slate-900 text-white shadow-sm'
+                          ? 'btn-action-cyan shadow-sm'
                           : 'bg-slate-100 border border-slate-200 text-slate-700 hover:text-slate-950 hover:bg-slate-200'
                       }`}
                     >
@@ -242,21 +244,21 @@ export default function TripWizardPage() {
                         <div
                           key={dest.id}
                           onClick={() => setDestinationId(dest.id)}
-                          className={`p-3 rounded-2xl border flex items-center justify-between space-x-3 cursor-pointer transition relative ${
+                          className={`btn-interactive p-3 rounded-2xl border flex items-center justify-between space-x-3 cursor-pointer transition relative text-left ${
                             isSelected
-                              ? 'bg-teal-50 border-teal-600 text-teal-950 ring-1 ring-teal-600 shadow-sm'
-                              : 'bg-white border-slate-200 text-slate-800 hover:border-teal-500 hover:bg-teal-50/30 shadow-sm'
+                              ? 'bg-cyan-50 border-cyan-600 text-cyan-950 ring-2 ring-cyan-500 shadow-md shadow-cyan-500/20'
+                              : 'bg-white border-slate-200 text-slate-800 hover:border-cyan-400 hover:bg-cyan-50/40 shadow-sm'
                           }`}
                         >
                           <div className="flex items-center space-x-3 min-w-0">
                             <img src={img} alt={dest.name} className="w-12 h-12 rounded-xl object-cover flex-shrink-0" />
                             <div className="min-w-0">
-                              <div className="font-bold text-xs truncate text-slate-900">{dest.name}</div>
-                              <div className="text-[10px] text-slate-800 font-medium truncate">{dest.country} • <span className="text-slate-700 font-bold">{dest.continent}</span></div>
+                              <div className="font-black text-xs truncate text-slate-900">{dest.name}</div>
+                              <div className="text-[10px] text-slate-600 font-bold truncate">{dest.country} • <span className="text-cyan-800">{dest.continent}</span></div>
                             </div>
                           </div>
                           {isSelected && (
-                            <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
+                            <div className="w-6 h-6 rounded-full bg-cyan-600 text-white flex items-center justify-center flex-shrink-0 shadow-sm">
                               <Check className="w-3.5 h-3.5 stroke-[3]" />
                             </div>
                           )}
@@ -268,14 +270,14 @@ export default function TripWizardPage() {
 
                 {/* Selected Destination Active Banner */}
                 {selectedDestObj && (
-                  <div className="mt-3 p-3 bg-teal-50 border border-teal-200 rounded-2xl flex items-center justify-between text-xs">
+                  <div className="mt-3 p-3.5 bg-gradient-to-r from-teal-50 to-emerald-50 border border-teal-200 rounded-2xl flex items-center justify-between text-xs shadow-sm">
                     <div className="flex items-center space-x-2.5">
                       <Compass className="w-4 h-4 text-teal-700 flex-shrink-0" />
                       <span className="text-slate-800">
-                        Selected: <strong className="text-teal-900">{selectedDestObj.name}</strong> ({selectedDestObj.country})
+                        Selected: <strong className="text-teal-900 font-extrabold">{selectedDestObj.name}</strong> ({selectedDestObj.country})
                       </span>
                     </div>
-                    <span className="text-teal-800 font-bold">~${selectedDestObj.averageDailyCost || 150}/day</span>
+                    <span className="text-teal-900 font-black">~${selectedDestObj.averageDailyCost || 150}/day</span>
                   </div>
                 )}
               </div>
@@ -285,7 +287,7 @@ export default function TripWizardPage() {
           {/* Step 2: Dates & Travelers */}
           {step === 2 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h3 className="text-xl font-bold text-blue-950 font-heading">2. Trip Dates & Group Size</h3>
+              <h3 className="text-xl font-black text-blue-950 font-heading">2. Trip Dates & Group Size</h3>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
@@ -294,7 +296,7 @@ export default function TripWizardPage() {
                     type="date"
                     value={startDate}
                     onChange={(e) => setStartDate(e.target.value)}
-                    className="w-full glass-input text-xs text-slate-900"
+                    className="w-full glass-input text-xs sm:text-sm font-bold text-slate-900"
                   />
                 </div>
                 <div>
@@ -303,7 +305,7 @@ export default function TripWizardPage() {
                     type="date"
                     value={endDate}
                     onChange={(e) => setEndDate(e.target.value)}
-                    className="w-full glass-input text-xs text-slate-900"
+                    className="w-full glass-input text-xs sm:text-sm font-bold text-slate-900"
                   />
                 </div>
               </div>
@@ -316,7 +318,7 @@ export default function TripWizardPage() {
                   max="20"
                   value={travelersCount}
                   onChange={(e) => setTravelersCount(e.target.value)}
-                  className="w-full glass-input text-xs text-slate-900"
+                  className="w-full glass-input text-xs sm:text-sm font-bold text-slate-900"
                 />
               </div>
             </div>
@@ -325,7 +327,7 @@ export default function TripWizardPage() {
           {/* Step 3: Budget & Currency */}
           {step === 3 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h3 className="text-xl font-bold text-blue-950 font-heading">3. Set Budget Allocation</h3>
+              <h3 className="text-xl font-black text-blue-950 font-heading">3. Set Budget Allocation</h3>
 
               <div>
                 <label className="block text-xs font-extrabold text-slate-800 mb-2">Total Budget Target</label>
@@ -334,7 +336,7 @@ export default function TripWizardPage() {
                   step="100"
                   value={totalBudget}
                   onChange={(e) => setTotalBudget(e.target.value)}
-                  className="w-full glass-input text-xs text-slate-900"
+                  className="w-full glass-input text-xs sm:text-sm font-bold text-slate-900"
                 />
               </div>
 
@@ -343,7 +345,7 @@ export default function TripWizardPage() {
                 <select
                   value={currency}
                   onChange={(e) => setCurrency(e.target.value)}
-                  className="w-full glass-input text-xs cursor-pointer text-slate-900"
+                  className="w-full glass-input text-xs sm:text-sm font-bold cursor-pointer text-slate-900"
                 >
                   <option value="USD">USD ($)</option>
                   <option value="EUR">EUR (€)</option>
@@ -358,28 +360,28 @@ export default function TripWizardPage() {
           {/* Step 4: Final Confirmation */}
           {step === 4 && (
             <div className="space-y-6 animate-in fade-in duration-300">
-              <h3 className="text-xl font-bold text-blue-950 font-heading">4. Review & Build Smart Itinerary</h3>
+              <h3 className="text-xl font-black text-blue-950 font-heading">4. Review & Build Smart Itinerary</h3>
 
               <div className="bg-white p-5 rounded-2xl border border-slate-200 space-y-3 text-xs shadow-sm">
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span className="text-slate-600 font-semibold">Title:</span>
-                  <span className="font-bold text-slate-900">{title}</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500 font-bold">Title:</span>
+                  <span className="font-extrabold text-slate-900">{title}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span className="text-slate-600 font-semibold">Destination:</span>
-                  <span className="font-bold text-teal-800">{selectedDestObj?.name}, {selectedDestObj?.country}</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500 font-bold">Destination:</span>
+                  <span className="font-extrabold text-teal-800">{selectedDestObj?.name}, {selectedDestObj?.country}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span className="text-slate-600 font-semibold">Dates:</span>
-                  <span className="font-bold text-slate-900">{startDate} to {endDate}</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500 font-bold">Dates:</span>
+                  <span className="font-extrabold text-slate-900">{startDate} to {endDate}</span>
                 </div>
-                <div className="flex justify-between py-1 border-b border-slate-100">
-                  <span className="text-slate-600 font-semibold">Group Size:</span>
-                  <span className="font-bold text-slate-900">{travelersCount} Travelers</span>
+                <div className="flex justify-between py-1.5 border-b border-slate-100">
+                  <span className="text-slate-500 font-bold">Group Size:</span>
+                  <span className="font-extrabold text-slate-900">{travelersCount} Travelers</span>
                 </div>
-                <div className="flex justify-between py-1">
-                  <span className="text-slate-600 font-semibold">Budget Target:</span>
-                  <span className="font-bold text-emerald-800">{currency} {totalBudget}</span>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-slate-500 font-bold">Budget Target:</span>
+                  <span className="font-extrabold text-emerald-800">{currency} ${totalBudget}</span>
                 </div>
               </div>
             </div>
@@ -390,7 +392,7 @@ export default function TripWizardPage() {
             {step > 1 ? (
               <button
                 onClick={handlePrev}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs flex items-center space-x-2 transition"
+                className="btn-interactive px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-800 font-bold rounded-xl text-xs flex items-center space-x-2 transition"
               >
                 <ArrowLeft className="w-4 h-4" />
                 <span>Back</span>
@@ -400,7 +402,7 @@ export default function TripWizardPage() {
             {step < 4 ? (
               <button
                 onClick={handleNext}
-                className="px-6 py-2.5 bg-gradient-to-r from-cyan-500 to-sky-500 hover:opacity-95 text-slate-950 font-black rounded-xl text-xs flex items-center space-x-2 shadow-lg shadow-cyan-500/20 transition"
+                className="btn-interactive btn-action-cyan px-7 py-3 text-white font-black rounded-xl text-xs shadow-md flex items-center space-x-2"
               >
                 <span>Continue</span>
                 <ArrowRight className="w-4 h-4" />
@@ -409,10 +411,10 @@ export default function TripWizardPage() {
               <button
                 onClick={handleSubmit}
                 disabled={loading}
-                className="px-8 py-3 bg-gradient-to-r from-cyan-500 via-sky-500 to-indigo-600 hover:opacity-95 text-slate-950 font-black rounded-xl text-sm shadow-xl shadow-cyan-500/30 transition flex items-center space-x-2"
+                className="btn-interactive btn-action-teal px-8 py-3.5 text-white font-black rounded-xl text-sm shadow-xl flex items-center space-x-2"
               >
                 {loading ? (
-                  <div className="w-5 h-5 border-2 border-slate-950 border-t-transparent rounded-full animate-spin" />
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
                 ) : (
                   <>
                     <Sparkles className="w-4 h-4" />
