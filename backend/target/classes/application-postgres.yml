@@ -13,3 +13,15 @@ spring:
   flyway:
     enabled: true
     baseline-on-migrate: true
+    spring:
+  datasource:
+    url:postgresql://travel_db_955n_user:ww1KOkg7AjgcfY3hi2aQ8L3iApQIpYtF@dpg-danv6eegekts73aa6g3g-a/travel_db_955n
+    username: travel_db_955n_user
+    password: ww1K0kg7AjgcfY3hi2aQ8L3iApQIpYtFss
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+    show-sql: true
